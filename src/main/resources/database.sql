@@ -41,8 +41,8 @@ CREATE TABLE BOOK (
     Format VARCHAR(20),
     UserId INT,
     PublisherId INT,
-    FOREIGN KEY (UserId) REFERENCES USER(UserId),
-    FOREIGN KEY (PublisherId) REFERENCES PUBLISHER(PublisherId)
+    FOREIGN KEY (UserId) REFERENCES USER(UserId) ON DELETE SET NULL,
+    FOREIGN KEY (PublisherId) REFERENCES PUBLISHER(PublisherId) ON DELETE SET NULL
 );
 
 -- COLLECTION Table
@@ -113,9 +113,9 @@ CREATE TABLE BOOKMARK (
 
 -- Insert sample users (password: "password123" hashed with BCrypt)
 INSERT INTO USER (UserName, HashedPassword) VALUES
-('an_nguyen', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy'),
-('binh_le', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy'),
-('chi_tran', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy');
+('an_nguyen', '$2a$10$/GSMwQcPHJru9XQ/6tY/DuZ6ITakJ29fa0UM8xPmPz6E6ji2wuFDa'),
+('binh_le', '$2a$10$/GSMwQcPHJru9XQ/6tY/DuZ6ITakJ29fa0UM8xPmPz6E6ji2wuFDa'),
+('chi_tran', '$2a$10$/GSMwQcPHJru9XQ/6tY/DuZ6ITakJ29fa0UM8xPmPz6E6ji2wuFDa');
 
 -- Insert publishers
 INSERT INTO PUBLISHER (PublisherName) VALUES
