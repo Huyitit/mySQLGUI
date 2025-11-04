@@ -126,12 +126,116 @@ function selectPublisher(publisherName) {
   publisherSuggestions.classList.remove("show");
 }
 
+// Genre autocomplete and multi-select
+const genreInput = document.getElementById("genres");
+const genreSuggestions = document.getElementById("genreSuggestions");
+const selectedGenresDiv = document.getElementById("selectedGenres");
+let selectedGenres = [];
+let genreDebounceTimer;
+
+if (genreInput) {
+  genreInput.addEventListener("input", (e) => {
+    clearTimeout(genreDebounceTimer);
+    const query = e.target.value.trim();
+    
+    if (query.length < 1) {
+      genreSuggestions.classList.remove("show");
+      return;
+    }
+    
+    genreDebounceTimer = setTimeout(async () => {
+      try {
+        const response = await fetch(`${API_URL}/genres/search?q=${encodeURIComponent(query)}`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        });
+        
+        if (response.ok) {
+          const genres = await response.json();
+          displayGenreSuggestions(genres);
+        }
+      } catch (error) {
+        console.error("Error fetching genres:", error);
+      }
+    }, 300);
+  });
+  
+  // Close suggestions when clicking outside
+  document.addEventListener("click", (e) => {
+    if (e.target !== genreInput && e.target !== genreSuggestions) {
+      genreSuggestions.classList.remove("show");
+    }
+  });
+}
+
+function displayGenreSuggestions(genres) {
+  // Filter out already selected genres
+  const availableGenres = genres.filter(g => 
+    !selectedGenres.some(sg => sg.genreId === g.genreId)
+  );
+  
+  if (availableGenres.length === 0) {
+    genreSuggestions.classList.remove("show");
+    return;
+  }
+  
+  genreSuggestions.innerHTML = availableGenres
+    .map(genre => `
+      <div class="suggestion-item" onclick="selectGenre(${genre.genreId}, '${genre.genreName.replace(/'/g, "\\'")}')">
+        ${genre.genreName}
+      </div>
+    `)
+    .join('');
+  
+  genreSuggestions.classList.add("show");
+}
+
+function selectGenre(genreId, genreName) {
+  // Add to selected genres
+  if (!selectedGenres.some(g => g.genreId === genreId)) {
+    selectedGenres.push({ genreId, genreName });
+    updateSelectedGenresDisplay();
+  }
+  
+  // Clear input
+  genreInput.value = '';
+  genreSuggestions.classList.remove("show");
+}
+
+function removeGenre(genreId) {
+  selectedGenres = selectedGenres.filter(g => g.genreId !== genreId);
+  updateSelectedGenresDisplay();
+}
+
+function updateSelectedGenresDisplay() {
+  if (selectedGenres.length === 0) {
+    selectedGenresDiv.innerHTML = '';
+    return;
+  }
+  
+  selectedGenresDiv.innerHTML = selectedGenres
+    .map(genre => `
+      <span class="selected-item">
+        ${genre.genreName}
+        <button type="button" onclick="removeGenre(${genre.genreId})" class="remove-item">×</button>
+      </span>
+    `)
+    .join('');
+}
+
 const uploadForm = document.getElementById("uploadForm");
 if (uploadForm) {
   uploadForm.addEventListener("submit", async (e) => {
     e.preventDefault();
 
     const formData = new FormData(uploadForm);
+    
+    // Add selected genres as JSON
+    if (selectedGenres.length > 0) {
+      formData.append("genreIds", JSON.stringify(selectedGenres.map(g => g.genreId)));
+    }
+    
     const progressBar = document.getElementById("progressBar");
     const progressFill = document.getElementById("progressFill");
     const messageDiv = document.getElementById("message");

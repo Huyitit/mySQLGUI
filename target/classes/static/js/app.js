@@ -211,6 +211,11 @@ function displayBooks(books, containerId) {
             })" class="btn btn-small">
                 Read
             </button>
+            <button onclick="deleteFromLibrary(${
+              book.book?.bookId || book.bookId
+            })" class="btn btn-small" style="background: #dc3545;">
+                🗑️ Remove
+            </button>
         `;
     container.appendChild(card);
   });
@@ -293,6 +298,37 @@ async function addToLibrary(bookId) {
   } catch (error) {
     console.error("Error adding book:", error);
     alert("Failed to add book to library");
+  }
+}
+
+// Delete Book from Library
+async function deleteFromLibrary(bookId) {
+  if (!confirm("Are you sure you want to remove this book from your library?")) {
+    return;
+  }
+  
+  try {
+    const response = await fetch(`${API_URL}/library/${bookId}`, {
+      method: "DELETE",
+      headers: getAuthHeaders(),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || "Failed to remove book");
+    }
+
+    alert("Book removed from your library!");
+    
+    // Reload library
+    if (typeof loadUserLibrary === 'function') {
+      loadUserLibrary();
+    } else if (typeof loadDashboard === 'function') {
+      loadDashboard();
+    }
+  } catch (error) {
+    console.error("Error removing book:", error);
+    alert("Failed to remove book from library: " + error.message);
   }
 }
 

@@ -128,6 +128,7 @@ public class BookController {
             @RequestParam(value = "author", required = false) String author,
             @RequestParam(value = "published_date", required = false) String publishedDate,
             @RequestParam(value = "language", required = false) String language,
+            @RequestParam(value = "genreIds", required = false) String genreIdsJson,
             @RequestParam("ebookContent") MultipartFile file,
             @AuthenticationPrincipal UserPrincipal userPrincipal) {
         
@@ -184,6 +185,23 @@ public class BookController {
             
             // Save to database
             bookDAO.addBook(newBook, uploaderId);
+            
+            // Add genres if provided
+            if (genreIdsJson != null && !genreIdsJson.trim().isEmpty()) {
+                try {
+                    // Parse genre IDs from JSON array
+                    com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+                    List<Integer> genreIds = mapper.readValue(genreIdsJson, 
+                        mapper.getTypeFactory().constructCollectionType(List.class, Integer.class));
+                    
+                    if (!genreIds.isEmpty()) {
+                        bookDAO.addGenresToBook(newBook.getBookId(), genreIds);
+                    }
+                } catch (Exception e) {
+                    System.err.println("Failed to parse or add genres: " + e.getMessage());
+                    // Don't fail the whole upload if genres fail
+                }
+            }
             
             return ResponseEntity.status(HttpStatus.CREATED).body(newBook);
             

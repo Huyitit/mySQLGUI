@@ -318,4 +318,27 @@ public class BookDAO {
             return stmt.executeUpdate() > 0;
         }
     }
+    
+    /**
+     * Add genres to a book
+     */
+    public void addGenresToBook(int bookId, List<Integer> genreIds) throws SQLException {
+        if (genreIds == null || genreIds.isEmpty()) {
+            return;
+        }
+        
+        String sql = "INSERT IGNORE INTO GENREBOOK (GenreId, BookId) VALUES (?, ?)";
+        
+        try (Connection conn = ConnectionManager.getInstance().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            for (Integer genreId : genreIds) {
+                stmt.setInt(1, genreId);
+                stmt.setInt(2, bookId);
+                stmt.addBatch();
+            }
+            
+            stmt.executeBatch();
+        }
+    }
 }

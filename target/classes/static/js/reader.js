@@ -30,7 +30,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Also save progress periodically (every 30 seconds)
   setInterval(() => {
     saveReadingProgress();
-  }, 1000);
+  }, 30000);
 });
 
 // Load book details and file
@@ -171,7 +171,7 @@ async function loadEPUB(bookId) {
 }
 
 // Navigation
-function prevPage() {
+function previousPage() {
   if (currentPage > 1) {
     renderPage(currentPage - 1);
     // Save progress after page change
