@@ -1,34 +1,43 @@
 package com.dbinteract.database;
 
-import com.dbinteract.utils.ConfigLoader;
-
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
+import jakarta.annotation.PostConstruct;
+
 /**
- * Singleton class to manage database connections
+ * Component to manage database connections using Spring configuration
  */
+@Component
 public class ConnectionManager {
     
-    private static ConnectionManager instance;
+    @Value("${spring.datasource.url}")
     private String url;
+    
+    @Value("${spring.datasource.username}")
     private String username;
+    
+    @Value("${spring.datasource.password}")
     private String password;
     
-    private ConnectionManager() {
-        this.url = ConfigLoader.getDatabaseUrl();
-        this.username = ConfigLoader.getDatabaseUsername();
-        this.password = ConfigLoader.getDatabasePassword();
+    private static ConnectionManager instance;
+    
+    public ConnectionManager() {
+    }
+    
+    @PostConstruct
+    public void init() {
+        instance = this;
     }
     
     /**
      * Get the singleton instance of ConnectionManager
      */
     public static synchronized ConnectionManager getInstance() {
-        if (instance == null) {
-            instance = new ConnectionManager();
-        }
         return instance;
     }
     

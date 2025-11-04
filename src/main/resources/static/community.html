@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Community Books - Book Library</title>
+    <link rel="stylesheet" href="/css/style.css" />
+  </head>
+  <body>
+    <nav class="navbar">
+      <div class="nav-brand">📚 Book Library</div>
+      <ul class="nav-menu">
+        <li><a href="/dashboard.html">Dashboard</a></li>
+        <li><a href="/community.html" class="active">Community</a></li>
+        <li><a href="/library.html">My Library</a></li>
+        <li><a href="/upload.html">Upload</a></li>
+        <li><a href="#" id="logout">Logout</a></li>
+      </ul>
+    </nav>
+
+    <div class="container">
+      <h1>📖 Community Books</h1>
+
+      <div class="search-bar">
+        <input
+          type="text"
+          id="searchInput"
+          placeholder="Search books by title, author, or genre..."
+        />
+        <button onclick="searchBooks()" class="btn">Search</button>
+      </div>
+
+      <div class="filters">
+        <select id="languageFilter">
+          <option value="">All Languages</option>
+          <option value="English">English</option>
+          <option value="Vietnamese">Vietnamese</option>
+        </select>
+
+        <select id="formatFilter">
+          <option value="">All Formats</option>
+          <option value="PDF">PDF</option>
+          <option value="EPUB">EPUB</option>
+          <option value="MOBI">MOBI</option>
+        </select>
+
+        <button onclick="applyFilters()" class="btn">Apply Filters</button>
+      </div>
+
+      <div id="booksGrid" class="books-grid"></div>
+    </div>
+
+    <!-- Book Info Modal -->
+    <div id="bookInfoModal" class="modal">
+      <div class="modal-content">
+        <span class="close" onclick="closeBookInfo()">&times;</span>
+        <h2 id="modalBookTitle">Book Information</h2>
+        <div id="bookInfoContent"></div>
+      </div>
+    </div>
+
+    <script src="/js/app.js"></script>
+    <script>
+      loadCommunityBooks();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard - Book Library</title>
+    <link rel="stylesheet" href="/css/style.css" />
+  </head>
+  <body>
+    <nav class="navbar">
+      <div class="nav-brand">📚 Book Library</div>
+      <ul class="nav-menu">
+        <li><a href="/dashboard.html" class="active">Dashboard</a></li>
+        <li><a href="/community.html">Community</a></li>
+        <li><a href="/library.html">My Library</a></li>
+        <li><a href="/upload.html">Upload</a></li>
+        <li><a href="#" id="logout">Logout</a></li>
+      </ul>
+    </nav>
+
+    <div class="container">
+      <h1>Welcome, <span id="username"></span>!</h1>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <h3>📖 Total Books</h3>
+          <p id="totalBooks" class="stat-number">0</p>
+        </div>
+        <div class="stat-card">
+          <h3>📚 Reading</h3>
+          <p id="readingBooks" class="stat-number">0</p>
+        </div>
+        <div class="stat-card">
+          <h3>✅ Completed</h3>
+          <p id="completedBooks" class="stat-number">0</p>
+        </div>
+        <div class="stat-card">
+          <h3>🏷️ Collections</h3>
+          <p id="totalCollections" class="stat-number">0</p>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2>Recently Added</h2>
+        <div id="recentBooks" class="books-grid"></div>
+      </div>
+
+      <div class="section">
+        <h2>Continue Reading</h2>
+        <div id="continueReading" class="books-grid"></div>
+      </div>
+
+      <div class="section">
+        <h2>My Collections</h2>
+        <button onclick="createCollection()" class="btn" style="margin-bottom: 1rem;">
+          + New Collection
+        </button>
+        <div id="collectionsGrid" class="collections-grid"></div>
+      </div>
+    </div>
+
+    <!-- Book Info Modal -->
+    <div id="bookInfoModal" class="modal">
+      <div class="modal-content">
+        <span class="close" onclick="closeBookInfo()">&times;</span>
+        <h2 id="modalBookTitle">Book Information</h2>
+        <div id="bookInfoContent"></div>
+      </div>
+    </div>
+
+    <script src="/js/app.js"></script>
+    <script>
+      // Load dashboard data
+      loadDashboard();
+    </script>
+  </body>
+</html>

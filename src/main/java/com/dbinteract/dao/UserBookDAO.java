@@ -1,16 +1,25 @@
 package com.dbinteract.dao;
 
-import com.dbinteract.database.ConnectionManager;
-
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.stereotype.Repository;
+
+import com.dbinteract.database.ConnectionManager;
+import com.dbinteract.models.UserBook;
+
 /**
  * Data Access Object for USERBOOK table and complex queries
  */
+@Repository
 public class UserBookDAO {
     
     /**
@@ -21,7 +30,10 @@ public class UserBookDAO {
         List<Map<String, Object>> results = new ArrayList<>();
         
         String sql = "SELECT " +
+                "    b.BookId, " +
                 "    b.Name AS BookTitle, " +
+                "    b.Language, " +
+                "    b.Format, " +
                 "    GROUP_CONCAT(DISTINCT a.AuthorName SEPARATOR ', ') AS Authors, " +
                 "    ub.Progress, " +
                 "    ub.UserRating, " +
@@ -32,7 +44,7 @@ public class UserBookDAO {
                 "LEFT JOIN AUTHORBOOK ab ON b.BookId = ab.BookId " +
                 "LEFT JOIN AUTHOR a ON ab.AuthorId = a.AuthorId " +
                 "WHERE u.UserName = ? " +
-                "GROUP BY b.BookId, b.Name, ub.Progress, ub.UserRating, ub.LastReadDate " +
+                "GROUP BY b.BookId, b.Name, b.Language, b.Format, ub.Progress, ub.UserRating, ub.LastReadDate " +
                 "ORDER BY ub.LastReadDate DESC";
         
         try (Connection conn = ConnectionManager.getInstance().getConnection();
@@ -43,15 +55,18 @@ public class UserBookDAO {
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
                     Map<String, Object> row = new HashMap<>();
-                    row.put("BookTitle", rs.getString("BookTitle"));
-                    row.put("Authors", rs.getString("Authors"));
-                    row.put("Progress", rs.getString("Progress"));
+                    row.put("bookId", rs.getInt("BookId"));
+                    row.put("name", rs.getString("BookTitle"));
+                    row.put("language", rs.getString("Language"));
+                    row.put("format", rs.getString("Format"));
+                    row.put("authors", rs.getString("Authors"));
+                    row.put("progress", rs.getString("Progress"));
                     
                     int rating = rs.getInt("UserRating");
-                    row.put("UserRating", rs.wasNull() ? null : rating);
+                    row.put("userRating", rs.wasNull() ? null : rating);
                     
                     Timestamp lastRead = rs.getTimestamp("LastReadDate");
-                    row.put("LastReadDate", lastRead != null ? lastRead.toString() : "Never");
+                    row.put("lastReadDate", lastRead != null ? lastRead.toString() : "Never");
                     
                     results.add(row);
                 }
@@ -84,6 +99,37 @@ public class UserBookDAO {
                     result.put("BookTitle", bookTitle);
                     result.put("AverageRating", rs.wasNull() ? 0.0 : avgRating);
                     result.put("TotalRatings", rs.getInt("TotalRatings"));
+                }
+            }
+        }
+        return result;
+    }
+    
+    /**
+     * Get average rating for a book by ID
+     */
+    public Map<String, Object> getAverageRating(int bookId) throws SQLException {
+        Map<String, Object> result = new HashMap<>();
+        
+        String sql = "SELECT " +
+                "    AVG(ub.UserRating) AS AverageRating, " +
+                "    COUNT(ub.UserRating) AS TotalRatings " +
+                "FROM USERBOOK ub " +
+                "WHERE ub.BookId = ? AND ub.UserRating IS NOT NULL";
+        
+        try (Connection conn = ConnectionManager.getInstance().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setInt(1, bookId);
+            
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    double avgRating = rs.getDouble("AverageRating");
+                    result.put("AverageRating", rs.wasNull() ? 0.0 : avgRating);
+                    result.put("TotalRatings", rs.getInt("TotalRatings"));
+                } else {
+                    result.put("AverageRating", 0.0);
+                    result.put("TotalRatings", 0);
                 }
             }
         }
@@ -131,5 +177,101 @@ public class UserBookDAO {
             }
         }
         return results;
+    }
+    
+    /**
+     * Add book to user's library
+     * If book already exists in library, do nothing (no error)
+     */
+    public void addUserBook(UserBook userBook) throws SQLException {
+        // First check if book already exists in user's library
+        String checkSql = "SELECT COUNT(*) FROM USERBOOK WHERE UserId = ? AND BookId = ?";
+        try (Connection conn = ConnectionManager.getInstance().getConnection();
+             PreparedStatement checkStmt = conn.prepareStatement(checkSql)) {
+            
+            checkStmt.setInt(1, userBook.getUserId());
+            checkStmt.setInt(2, userBook.getBookId());
+            
+            try (ResultSet rs = checkStmt.executeQuery()) {
+                if (rs.next() && rs.getInt(1) > 0) {
+                    // Book already in library, don't insert again
+                    return;
+                }
+            }
+        }
+        
+        // Book not in library, insert it
+        String sql = "INSERT INTO USERBOOK (UserId, BookId, Progress, AddedDate, UserRating) " +
+                     "VALUES (?, ?, ?, ?, ?)";
+        
+        try (Connection conn = ConnectionManager.getInstance().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setInt(1, userBook.getUserId());
+            stmt.setInt(2, userBook.getBookId());
+            stmt.setString(3, userBook.getProgress());
+            stmt.setTimestamp(4, userBook.getAddedDate() != null ? 
+                Timestamp.valueOf(userBook.getAddedDate()) : new Timestamp(System.currentTimeMillis()));
+            
+            if (userBook.getUserRating() != null) {
+                stmt.setInt(5, userBook.getUserRating());
+            } else {
+                stmt.setNull(5, Types.INTEGER);
+            }
+            
+            stmt.executeUpdate();
+        }
+    }
+    
+    /**
+     * Update reading progress
+     */
+    public void updateProgress(int userId, int bookId, String progress) throws SQLException {
+        String sql = "UPDATE USERBOOK SET Progress = ?, LastReadDate = ? " +
+                     "WHERE UserId = ? AND BookId = ?";
+        
+        try (Connection conn = ConnectionManager.getInstance().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setString(1, progress);
+            stmt.setTimestamp(2, new Timestamp(System.currentTimeMillis()));
+            stmt.setInt(3, userId);
+            stmt.setInt(4, bookId);
+            
+            stmt.executeUpdate();
+        }
+    }
+    
+    /**
+     * Update user's rating for a book
+     */
+    public void updateRating(int userId, int bookId, int rating) throws SQLException {
+        String sql = "UPDATE USERBOOK SET UserRating = ? WHERE UserId = ? AND BookId = ?";
+        
+        try (Connection conn = ConnectionManager.getInstance().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setInt(1, rating);
+            stmt.setInt(2, userId);
+            stmt.setInt(3, bookId);
+            
+            stmt.executeUpdate();
+        }
+    }
+    
+    /**
+     * Remove book from user's library
+     */
+    public void removeFromLibrary(int userId, int bookId) throws SQLException {
+        String sql = "DELETE FROM USERBOOK WHERE UserId = ? AND BookId = ?";
+        
+        try (Connection conn = ConnectionManager.getInstance().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setInt(1, userId);
+            stmt.setInt(2, bookId);
+            
+            stmt.executeUpdate();
+        }
     }
 }

@@ -1,16 +1,23 @@
 package com.dbinteract.dao;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.springframework.stereotype.Repository;
+
 import com.dbinteract.database.ConnectionManager;
 import com.dbinteract.models.User;
 import com.dbinteract.utils.PasswordHasher;
 
-import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * Data Access Object for USER table
  */
+@Repository
 public class UserDAO {
     
     /**
@@ -59,13 +66,12 @@ public class UserDAO {
     public User authenticate(String username, String password) throws SQLException {
         User user = findByUsername(username);
         
-        if (user != null)
-        {
+        if (user != null) {
             System.out.println("User found: " + user.getUserName());
-        } 
-        if(PasswordHasher.verifyPassword(password, user.getHashedPassword())) {
-            System.out.println("Password verified for user: " + user.getUserName());
-            return user;
+            if (PasswordHasher.verifyPassword(password, user.getHashedPassword())) {
+                System.out.println("Password verified for user: " + user.getUserName());
+                return user;
+            }
         }
         
         return null;
