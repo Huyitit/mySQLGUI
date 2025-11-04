@@ -30,7 +30,7 @@ public class LoginPanel extends JPanel {
         gbc.insets = new Insets(5, 5, 5, 5);
         
         // Title
-        JLabel titleLabel = new JLabel("📚 " + Constants.APP_TITLE);
+        JLabel titleLabel = new JLabel(Constants.APP_TITLE);
         titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
         gbc.gridx = 0;
         gbc.gridy = 0;
@@ -109,14 +109,6 @@ public class LoginPanel extends JPanel {
         gbc.insets = new Insets(5, 5, 5, 5);
         add(registerButton, gbc);
         
-        // Info label
-        JLabel infoLabel = new JLabel("<html><center>Sample users: an_nguyen, binh_le, chi_tran<br>Password: password123</center></html>");
-        infoLabel.setForeground(Color.GRAY);
-        infoLabel.setFont(new Font("Arial", Font.PLAIN, 11));
-        gbc.gridy = 7;
-        gbc.insets = new Insets(20, 5, 5, 5);
-        add(infoLabel, gbc);
-        
         // Enable Enter key for login
         passwordField.addActionListener(e -> handleLogin());
     }
@@ -148,7 +140,7 @@ public class LoginPanel extends JPanel {
                     User user = get();
                     if (user != null) {
                         mainFrame.setCurrentUser(user);
-                        mainFrame.showPanel(Constants.PANEL_DASHBOARD);
+                        mainFrame.showPanel(Constants.PANEL_HOME);
                         clearFields();
                     } else {
                         messageLabel.setText(Constants.MSG_LOGIN_FAILED);

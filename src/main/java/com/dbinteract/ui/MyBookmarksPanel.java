@@ -10,9 +10,9 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Query 3 Panel: User's bookmarks and notes
+ * My Bookmarks Panel: User's bookmarks and notes
  */
-public class Query3Panel extends JPanel {
+public class MyBookmarksPanel extends JPanel {
     
     private MainFrame mainFrame;
     private JTable resultTable;
@@ -20,7 +20,7 @@ public class Query3Panel extends JPanel {
     private JLabel statusLabel;
     private JTextField bookTitleField;
     
-    public Query3Panel(MainFrame mainFrame) {
+    public MyBookmarksPanel(MainFrame mainFrame) {
         this.mainFrame = mainFrame;
         initializeUI();
     }
@@ -38,55 +38,64 @@ public class Query3Panel extends JPanel {
         JPanel mainPanel = new JPanel(new BorderLayout());
         
         JPanel panel = new JPanel(new BorderLayout());
-        panel.setBackground(new Color(52, 73, 94));
-        panel.setBorder(BorderFactory.createEmptyBorder(15, 20, 15, 20));
+        panel.setBackground(new Color(230, 126, 34));
+        panel.setBorder(BorderFactory.createEmptyBorder(20, 30, 20, 30));
         
-        JLabel titleLabel = new JLabel("📑 Query 3: My Bookmarks");
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 18));
+        JPanel leftPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        leftPanel.setOpaque(false);
+        
+        JLabel titleLabel = new JLabel("My Bookmarks");
+        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 24));
         titleLabel.setForeground(Color.WHITE);
-        panel.add(titleLabel, BorderLayout.WEST);
+        leftPanel.add(titleLabel);
         
-        JButton backButton = new JButton("← Back");
-        backButton.setBackground(new Color(52, 152, 219));
+        panel.add(leftPanel, BorderLayout.WEST);
+        
+        JButton backButton = new JButton("Back to Home");
+        backButton.setBackground(new Color(184, 101, 28));
         backButton.setForeground(Color.WHITE);
+        backButton.setFont(new Font("Segoe UI", Font.BOLD, 14));
         backButton.setBorderPainted(false);
         backButton.setFocusPainted(false);
-        backButton.addActionListener(e -> mainFrame.showPanel(Constants.PANEL_DASHBOARD));
+        backButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        backButton.setPreferredSize(new Dimension(150, 35));
+        backButton.setOpaque(true);
+        backButton.addActionListener(e -> mainFrame.showPanel(Constants.PANEL_HOME));
         panel.add(backButton, BorderLayout.EAST);
         
         mainPanel.add(panel, BorderLayout.NORTH);
         
-        // SQL and controls panel
-        JPanel sqlPanel = new JPanel(new BorderLayout());
-        sqlPanel.setBackground(new Color(236, 240, 241));
-        sqlPanel.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createMatteBorder(0, 0, 1, 0, new Color(189, 195, 199)),
-            BorderFactory.createEmptyBorder(10, 20, 10, 20)
-        ));
+        // Controls panel
+        JPanel controlsPanel = new JPanel(new BorderLayout());
+        controlsPanel.setBackground(new Color(240, 248, 255));
+        controlsPanel.setBorder(BorderFactory.createEmptyBorder(15, 30, 15, 30));
         
-        JLabel sqlLabel = new JLabel("<html><b>SQL:</b> SELECT bm.BookmarkName, bm.Location, bm.CreatedDate<br>" +
-                "FROM BOOKMARK bm JOIN USERBOOK ub ... WHERE u.UserName = ? AND b.Name = ?</html>");
-        sqlLabel.setFont(new Font("Monospaced", Font.PLAIN, 11));
-        sqlPanel.add(sqlLabel, BorderLayout.NORTH);
+        JPanel leftControls = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
+        leftControls.setOpaque(false);
         
-        JPanel controlPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        controlPanel.setOpaque(false);
-        controlPanel.add(new JLabel("Book Title:"));
+        JLabel bookLabel = new JLabel("Book Title:");
+        bookLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        leftControls.add(bookLabel);
         
         bookTitleField = new JTextField(30);
         bookTitleField.setText("Clean Code");
-        controlPanel.add(bookTitleField);
+        bookTitleField.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        leftControls.add(bookTitleField);
         
-        JButton executeButton = new JButton("Execute Query");
-        executeButton.setBackground(new Color(39, 174, 96));
-        executeButton.setForeground(Color.WHITE);
-        executeButton.setBorderPainted(false);
-        executeButton.setFocusPainted(false);
-        executeButton.addActionListener(e -> executeQuery());
-        controlPanel.add(executeButton);
+        JButton searchButton = new JButton("Search");
+        searchButton.setBackground(new Color(39, 174, 96));
+        searchButton.setForeground(Color.WHITE);
+        searchButton.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        searchButton.setBorderPainted(false);
+        searchButton.setFocusPainted(false);
+        searchButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        searchButton.setPreferredSize(new Dimension(100, 35));
+        searchButton.setOpaque(true);
+        searchButton.addActionListener(e -> executeQuery());
+        leftControls.add(searchButton);
         
-        sqlPanel.add(controlPanel, BorderLayout.CENTER);
-        mainPanel.add(sqlPanel, BorderLayout.SOUTH);
+        controlsPanel.add(leftControls, BorderLayout.WEST);
+        mainPanel.add(controlsPanel, BorderLayout.SOUTH);
         
         return mainPanel;
     }
@@ -112,10 +121,12 @@ public class Query3Panel extends JPanel {
     
     private JPanel createBottomPanel() {
         JPanel panel = new JPanel(new BorderLayout());
-        panel.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
-        panel.setBackground(Color.WHITE);
+        panel.setBorder(BorderFactory.createEmptyBorder(15, 30, 15, 30));
+        panel.setBackground(new Color(236, 240, 241));
         
-        statusLabel = new JLabel("Enter a book title and click 'Execute Query'");
+        statusLabel = new JLabel("Enter a book title to view bookmarks");
+        statusLabel.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        statusLabel.setForeground(new Color(52, 73, 94));
         panel.add(statusLabel, BorderLayout.WEST);
         
         return panel;
@@ -156,11 +167,12 @@ public class Query3Panel extends JPanel {
                         });
                     }
                     
-                    statusLabel.setText("Results: " + results.size() + " bookmarks found for '" + bookTitle + "'");
+                                        
+                    statusLabel.setText(results.size() + " bookmark" + (results.size() != 1 ? "s" : "") + " found");
                     
                 } catch (Exception e) {
                     statusLabel.setText("Error: " + e.getMessage());
-                    JOptionPane.showMessageDialog(Query3Panel.this,
+                    JOptionPane.showMessageDialog(MyBookmarksPanel.this,
                         "Failed to execute query: " + e.getMessage(),
                         "Query Error",
                         JOptionPane.ERROR_MESSAGE);

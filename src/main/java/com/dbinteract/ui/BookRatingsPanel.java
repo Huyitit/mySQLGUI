@@ -8,16 +8,16 @@ import java.awt.*;
 import java.util.Map;
 
 /**
- * Query 5 Panel: Book ratings
+ * Book Ratings Panel: Book ratings
  */
-public class Query5Panel extends JPanel {
+public class BookRatingsPanel extends JPanel {
     
     private MainFrame mainFrame;
     private JLabel statusLabel;
     private JTextField bookTitleField;
     private JTextArea resultArea;
     
-    public Query5Panel(MainFrame mainFrame) {
+    public BookRatingsPanel(MainFrame mainFrame) {
         this.mainFrame = mainFrame;
         initializeUI();
     }
@@ -35,55 +35,64 @@ public class Query5Panel extends JPanel {
         JPanel mainPanel = new JPanel(new BorderLayout());
         
         JPanel panel = new JPanel(new BorderLayout());
-        panel.setBackground(new Color(52, 73, 94));
-        panel.setBorder(BorderFactory.createEmptyBorder(15, 20, 15, 20));
+        panel.setBackground(new Color(241, 196, 15));
+        panel.setBorder(BorderFactory.createEmptyBorder(20, 30, 20, 30));
         
-        JLabel titleLabel = new JLabel("⭐ Query 5: Book Ratings");
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 18));
+        JPanel leftPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        leftPanel.setOpaque(false);
+        
+        JLabel titleLabel = new JLabel("Book Ratings");
+        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 24));
         titleLabel.setForeground(Color.WHITE);
-        panel.add(titleLabel, BorderLayout.WEST);
+        leftPanel.add(titleLabel);
         
-        JButton backButton = new JButton("← Back");
-        backButton.setBackground(new Color(52, 152, 219));
+        panel.add(leftPanel, BorderLayout.WEST);
+        
+        JButton backButton = new JButton("Back to Home");
+        backButton.setBackground(new Color(209, 152, 15));
         backButton.setForeground(Color.WHITE);
+        backButton.setFont(new Font("Segoe UI", Font.BOLD, 14));
         backButton.setBorderPainted(false);
         backButton.setFocusPainted(false);
-        backButton.addActionListener(e -> mainFrame.showPanel(Constants.PANEL_DASHBOARD));
+        backButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        backButton.setPreferredSize(new Dimension(150, 35));
+        backButton.setOpaque(true);
+        backButton.addActionListener(e -> mainFrame.showPanel(Constants.PANEL_HOME));
         panel.add(backButton, BorderLayout.EAST);
         
         mainPanel.add(panel, BorderLayout.NORTH);
         
-        // SQL and controls panel
-        JPanel sqlPanel = new JPanel(new BorderLayout());
-        sqlPanel.setBackground(new Color(236, 240, 241));
-        sqlPanel.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createMatteBorder(0, 0, 1, 0, new Color(189, 195, 199)),
-            BorderFactory.createEmptyBorder(10, 20, 10, 20)
-        ));
+        // Controls panel
+        JPanel controlsPanel = new JPanel(new BorderLayout());
+        controlsPanel.setBackground(new Color(240, 248, 255));
+        controlsPanel.setBorder(BorderFactory.createEmptyBorder(15, 30, 15, 30));
         
-        JLabel sqlLabel = new JLabel("<html><b>SQL:</b> SELECT AVG(ub.UserRating) AS AverageRating, COUNT(ub.UserRating) AS TotalRatings<br>" +
-                "FROM USERBOOK ub JOIN BOOK b ... WHERE b.Name = ? AND ub.UserRating IS NOT NULL</html>");
-        sqlLabel.setFont(new Font("Monospaced", Font.PLAIN, 11));
-        sqlPanel.add(sqlLabel, BorderLayout.NORTH);
+        JPanel leftControls = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
+        leftControls.setOpaque(false);
         
-        JPanel controlPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        controlPanel.setOpaque(false);
-        controlPanel.add(new JLabel("Book Title:"));
+        JLabel bookLabel = new JLabel("Book Title:");
+        bookLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        leftControls.add(bookLabel);
         
         bookTitleField = new JTextField(30);
         bookTitleField.setText("Clean Code");
-        controlPanel.add(bookTitleField);
+        bookTitleField.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        leftControls.add(bookTitleField);
         
-        JButton executeButton = new JButton("Execute Query");
-        executeButton.setBackground(new Color(39, 174, 96));
-        executeButton.setForeground(Color.WHITE);
-        executeButton.setBorderPainted(false);
-        executeButton.setFocusPainted(false);
-        executeButton.addActionListener(e -> executeQuery());
-        controlPanel.add(executeButton);
+        JButton checkButton = new JButton("Check Rating");
+        checkButton.setBackground(new Color(39, 174, 96));
+        checkButton.setForeground(Color.WHITE);
+        checkButton.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        checkButton.setBorderPainted(false);
+        checkButton.setFocusPainted(false);
+        checkButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        checkButton.setPreferredSize(new Dimension(140, 35));
+        checkButton.setOpaque(true);
+        checkButton.addActionListener(e -> executeQuery());
+        leftControls.add(checkButton);
         
-        sqlPanel.add(controlPanel, BorderLayout.CENTER);
-        mainPanel.add(sqlPanel, BorderLayout.SOUTH);
+        controlsPanel.add(leftControls, BorderLayout.WEST);
+        mainPanel.add(controlsPanel, BorderLayout.SOUTH);
         
         return mainPanel;
     }
@@ -153,16 +162,16 @@ public class Query5Panel extends JPanel {
                     
                     StringBuilder sb = new StringBuilder();
                     sb.append("═══════════════════════════════════════\n\n");
-                    sb.append("📖  Book: ").append(bookTitle).append("\n\n");
+                    sb.append("Book: ").append(bookTitle).append("\n\n");
                     sb.append("═══════════════════════════════════════\n\n");
                     
                     if (totalRatings == 0) {
-                        sb.append("⭐  No ratings yet\n\n");
+                        sb.append("No ratings yet\n\n");
                         sb.append("This book hasn't been rated by any users yet.");
                     } else {
-                        sb.append("⭐  Average Rating: ").append(String.format("%.2f", avgRating)).append(" / 5.0\n\n");
+                        sb.append("Average Rating: ").append(String.format("%.2f", avgRating)).append(" / 5.0\n\n");
                         sb.append(generateStarDisplay(avgRating)).append("\n\n");
-                        sb.append("👥  Total Ratings: ").append(totalRatings).append(" user(s)\n\n");
+                        sb.append("Total Ratings: ").append(totalRatings).append(" user(s)\n\n");
                         sb.append("═══════════════════════════════════════\n\n");
                         sb.append(getRatingDescription(avgRating));
                     }

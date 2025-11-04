@@ -10,18 +10,29 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Query 1 Panel: User's Library with status and progress
+ * My Library Panel: User's Library with status and progress
  */
-public class Query1Panel extends JPanel {
+public class MyLibraryPanel extends JPanel {
     
     private MainFrame mainFrame;
     private JTable resultTable;
     private DefaultTableModel tableModel;
     private JLabel statusLabel;
     
-    public Query1Panel(MainFrame mainFrame) {
+    public MyLibraryPanel(MainFrame mainFrame) {
         this.mainFrame = mainFrame;
         initializeUI();
+    }
+    
+    /**
+     * Load data when panel becomes visible
+     */
+    @Override
+    public void setVisible(boolean visible) {
+        super.setVisible(visible);
+        if (visible) {
+            executeQuery();
+        }
     }
     
     private void initializeUI() {
@@ -40,51 +51,63 @@ public class Query1Panel extends JPanel {
     
     private JPanel createHeaderPanel() {
         JPanel panel = new JPanel(new BorderLayout());
-        panel.setBackground(new Color(52, 73, 94));
-        panel.setBorder(BorderFactory.createEmptyBorder(15, 20, 15, 20));
+        panel.setBackground(new Color(52, 152, 219));
+        panel.setBorder(BorderFactory.createEmptyBorder(20, 30, 20, 30));
         
-        JLabel titleLabel = new JLabel("📖 Query 1: My Library");
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 18));
+        // Left side - Title
+        JPanel leftPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        leftPanel.setOpaque(false);
+        
+        JLabel titleLabel = new JLabel("My Library");
+        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 24));
         titleLabel.setForeground(Color.WHITE);
-        panel.add(titleLabel, BorderLayout.WEST);
+        leftPanel.add(titleLabel);
         
+        panel.add(leftPanel, BorderLayout.WEST);
+        
+        // Right side - Back button
         JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         rightPanel.setOpaque(false);
         
-        JButton backButton = new JButton("← Back");
-        backButton.setBackground(new Color(52, 152, 219));
+        JButton backButton = new JButton("Back to Home");
+        backButton.setBackground(new Color(41, 128, 185));
         backButton.setForeground(Color.WHITE);
+        backButton.setFont(new Font("Segoe UI", Font.BOLD, 14));
         backButton.setBorderPainted(false);
         backButton.setFocusPainted(false);
-        backButton.addActionListener(e -> mainFrame.showPanel(Constants.PANEL_DASHBOARD));
+        backButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        backButton.setPreferredSize(new Dimension(150, 35));
+        backButton.setOpaque(true);
+        backButton.addActionListener(e -> mainFrame.showPanel(Constants.PANEL_HOME));
         rightPanel.add(backButton);
         
         panel.add(rightPanel, BorderLayout.EAST);
         
-        // SQL Query info
-        JPanel sqlPanel = new JPanel(new BorderLayout());
-        sqlPanel.setBackground(new Color(236, 240, 241));
-        sqlPanel.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createMatteBorder(0, 0, 1, 0, new Color(189, 195, 199)),
-            BorderFactory.createEmptyBorder(10, 20, 10, 20)
-        ));
+        // Subtitle panel
+        JPanel subtitlePanel = new JPanel(new BorderLayout());
+        subtitlePanel.setBackground(new Color(240, 248, 255));
+        subtitlePanel.setBorder(BorderFactory.createEmptyBorder(15, 30, 15, 30));
         
-        JLabel sqlLabel = new JLabel("<html><b>SQL:</b> SELECT b.Name, a.AuthorName, ub.Progress, ub.UserRating, ub.LastReadDate<br>" +
-                "FROM USERBOOK ub JOIN BOOK b ... WHERE u.UserName = ?</html>");
-        sqlLabel.setFont(new Font("Monospaced", Font.PLAIN, 11));
-        sqlPanel.add(sqlLabel, BorderLayout.CENTER);
+        JLabel subtitleLabel = new JLabel("View and manage your book collection with reading progress and ratings");
+        subtitleLabel.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        subtitleLabel.setForeground(new Color(52, 73, 94));
+        subtitlePanel.add(subtitleLabel, BorderLayout.WEST);
         
-        JButton executeButton = new JButton("Execute Query");
-        executeButton.setBackground(new Color(39, 174, 96));
-        executeButton.setForeground(Color.WHITE);
-        executeButton.setBorderPainted(false);
-        executeButton.setFocusPainted(false);
-        executeButton.addActionListener(e -> executeQuery());
-        sqlPanel.add(executeButton, BorderLayout.EAST);
+        JButton refreshButton = new JButton("Refresh");
+        refreshButton.setBackground(new Color(39, 174, 96));
+        refreshButton.setForeground(Color.WHITE);
+        refreshButton.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        refreshButton.setBorderPainted(false);
+        refreshButton.setFocusPainted(false);
+        refreshButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        refreshButton.setPreferredSize(new Dimension(110, 32));
+        refreshButton.setOpaque(true);
+        refreshButton.addActionListener(e -> executeQuery());
+        subtitlePanel.add(refreshButton, BorderLayout.EAST);
         
         JPanel mainPanel = new JPanel(new BorderLayout());
         mainPanel.add(panel, BorderLayout.NORTH);
-        mainPanel.add(sqlPanel, BorderLayout.SOUTH);
+        mainPanel.add(subtitlePanel, BorderLayout.SOUTH);
         
         return mainPanel;
     }
@@ -111,11 +134,12 @@ public class Query1Panel extends JPanel {
     
     private JPanel createBottomPanel() {
         JPanel panel = new JPanel(new BorderLayout());
-        panel.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
-        panel.setBackground(Color.WHITE);
+        panel.setBorder(BorderFactory.createEmptyBorder(15, 30, 15, 30));
+        panel.setBackground(new Color(236, 240, 241));
         
-        statusLabel = new JLabel("Click 'Execute Query' to view your library");
-        statusLabel.setFont(new Font("Arial", Font.PLAIN, 12));
+        statusLabel = new JLabel("Loading your library...");
+        statusLabel.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        statusLabel.setForeground(new Color(52, 73, 94));
         panel.add(statusLabel, BorderLayout.WEST);
         
         return panel;
@@ -144,7 +168,7 @@ public class Query1Panel extends JPanel {
                     
                     for (Map<String, Object> row : results) {
                         Object rating = row.get("UserRating");
-                        String ratingStr = rating != null ? "⭐".repeat((Integer) rating) : "☆☆☆☆☆";
+                        String ratingStr = rating != null ? "*".repeat((Integer) rating) : "-----";
                         
                         tableModel.addRow(new Object[]{
                             row.get("BookTitle"),
@@ -155,11 +179,15 @@ public class Query1Panel extends JPanel {
                         });
                     }
                     
-                    statusLabel.setText("Results: " + results.size() + " books found");
+                    statusLabel.setText(results.size() + " book" + (results.size() != 1 ? "s" : "") + " in your library");
+                    
+                    if (results.isEmpty()) {
+                        statusLabel.setText("Your library is empty. Start adding books!");
+                    }
                     
                 } catch (Exception e) {
                     statusLabel.setText("Error: " + e.getMessage());
-                    JOptionPane.showMessageDialog(Query1Panel.this,
+                    JOptionPane.showMessageDialog(MyLibraryPanel.this,
                         "Failed to execute query: " + e.getMessage(),
                         "Query Error",
                         JOptionPane.ERROR_MESSAGE);

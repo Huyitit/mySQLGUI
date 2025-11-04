@@ -9,18 +9,26 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Query 6 Panel: Top popular books
+ * Popular Books Panel: Top popular books
  */
-public class Query6Panel extends JPanel {
+public class PopularBooksPanel extends JPanel {
     
     private MainFrame mainFrame;
     private JLabel statusLabel;
     private JSpinner limitSpinner;
     private JPanel resultsPanel;
     
-    public Query6Panel(MainFrame mainFrame) {
+    public PopularBooksPanel(MainFrame mainFrame) {
         this.mainFrame = mainFrame;
         initializeUI();
+    }
+    
+    @Override
+    public void setVisible(boolean visible) {
+        super.setVisible(visible);
+        if (visible) {
+            executeQuery();
+        }
     }
     
     private void initializeUI() {
@@ -49,66 +57,77 @@ public class Query6Panel extends JPanel {
         JPanel mainPanel = new JPanel(new BorderLayout());
         
         JPanel panel = new JPanel(new BorderLayout());
-        panel.setBackground(new Color(52, 73, 94));
-        panel.setBorder(BorderFactory.createEmptyBorder(15, 20, 15, 20));
+        panel.setBackground(new Color(231, 76, 60));
+        panel.setBorder(BorderFactory.createEmptyBorder(20, 30, 20, 30));
         
-        JLabel titleLabel = new JLabel("🔥 Query 6: Hot Books (Most Popular)");
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 18));
+        JPanel leftPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        leftPanel.setOpaque(false);
+        
+        JLabel titleLabel = new JLabel("Popular Books");
+        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 24));
         titleLabel.setForeground(Color.WHITE);
-        panel.add(titleLabel, BorderLayout.WEST);
+        leftPanel.add(titleLabel);
         
-        JButton backButton = new JButton("← Back");
-        backButton.setBackground(new Color(52, 152, 219));
+        panel.add(leftPanel, BorderLayout.WEST);
+        
+        JButton backButton = new JButton("Back to Home");
+        backButton.setBackground(new Color(207, 70, 71));
         backButton.setForeground(Color.WHITE);
+        backButton.setFont(new Font("Segoe UI", Font.BOLD, 14));
         backButton.setBorderPainted(false);
         backButton.setFocusPainted(false);
-        backButton.addActionListener(e -> mainFrame.showPanel(Constants.PANEL_DASHBOARD));
+        backButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        backButton.setPreferredSize(new Dimension(150, 35));
+        backButton.setOpaque(true);
+        backButton.addActionListener(e -> mainFrame.showPanel(Constants.PANEL_HOME));
         panel.add(backButton, BorderLayout.EAST);
         
         mainPanel.add(panel, BorderLayout.NORTH);
         
-        // SQL and controls panel
-        JPanel sqlPanel = new JPanel(new BorderLayout());
-        sqlPanel.setBackground(new Color(236, 240, 241));
-        sqlPanel.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createMatteBorder(0, 0, 1, 0, new Color(189, 195, 199)),
-            BorderFactory.createEmptyBorder(10, 20, 10, 20)
-        ));
+        // Controls panel
+        JPanel controlsPanel = new JPanel(new BorderLayout());
+        controlsPanel.setBackground(new Color(240, 248, 255));
+        controlsPanel.setBorder(BorderFactory.createEmptyBorder(15, 30, 15, 30));
         
-        JLabel sqlLabel = new JLabel("<html><b>SQL:</b> SELECT b.Name, COUNT(ub.UserId) AS TotalUsers, AVG(ub.UserRating) AS AvgRating<br>" +
-                "FROM USERBOOK ub JOIN BOOK b ... GROUP BY b.BookId ORDER BY TotalUsers DESC LIMIT ?</html>");
-        sqlLabel.setFont(new Font("Monospaced", Font.PLAIN, 11));
-        sqlPanel.add(sqlLabel, BorderLayout.NORTH);
+        JPanel leftControls = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
+        leftControls.setOpaque(false);
         
-        JPanel controlPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        controlPanel.setOpaque(false);
-        controlPanel.add(new JLabel("Top Limit:"));
+        JLabel limitLabel = new JLabel("Show Top:");
+        limitLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        leftControls.add(limitLabel);
         
         SpinnerNumberModel model = new SpinnerNumberModel(5, 1, 20, 1);
         limitSpinner = new JSpinner(model);
-        limitSpinner.setPreferredSize(new Dimension(60, 30));
-        controlPanel.add(limitSpinner);
+        limitSpinner.setPreferredSize(new Dimension(70, 35));
+        limitSpinner.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        leftControls.add(limitSpinner);
         
-        JButton executeButton = new JButton("Execute Query");
-        executeButton.setBackground(new Color(39, 174, 96));
-        executeButton.setForeground(Color.WHITE);
-        executeButton.setBorderPainted(false);
-        executeButton.setFocusPainted(false);
-        executeButton.addActionListener(e -> executeQuery());
-        controlPanel.add(executeButton);
+        JButton refreshButton = new JButton("Refresh");
+        refreshButton.setBackground(new Color(39, 174, 96));
+        refreshButton.setForeground(Color.WHITE);
+        refreshButton.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        refreshButton.setBorderPainted(false);
+        refreshButton.setFocusPainted(false);
+        refreshButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        refreshButton.setPreferredSize(new Dimension(100, 35));
+        refreshButton.setOpaque(true);
+        refreshButton.addActionListener(e -> executeQuery());
+        controlsPanel.add(refreshButton);
         
-        sqlPanel.add(controlPanel, BorderLayout.CENTER);
-        mainPanel.add(sqlPanel, BorderLayout.SOUTH);
+        controlsPanel.add(leftControls, BorderLayout.WEST);
+        mainPanel.add(controlsPanel, BorderLayout.SOUTH);
         
         return mainPanel;
     }
     
     private JPanel createBottomPanel() {
         JPanel panel = new JPanel(new BorderLayout());
-        panel.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
-        panel.setBackground(Color.WHITE);
+        panel.setBorder(BorderFactory.createEmptyBorder(15, 30, 15, 30));
+        panel.setBackground(new Color(236, 240, 241));
         
-        statusLabel = new JLabel("Click 'Execute Query' to view most popular books");
+        statusLabel = new JLabel("Loading popular books...");
+        statusLabel.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        statusLabel.setForeground(new Color(52, 73, 94));
         panel.add(statusLabel, BorderLayout.WEST);
         
         return panel;
@@ -118,7 +137,7 @@ public class Query6Panel extends JPanel {
         resultsPanel.removeAll();
         
         JLabel messageLabel = new JLabel("<html><center>" +
-                "<h2>🔥 Discover the Most Popular Books</h2>" +
+                "<h2>Discover the Most Popular Books</h2>" +
                 "<p>Click 'Execute Query' to see which books are trending!</p>" +
                 "</center></html>");
         messageLabel.setHorizontalAlignment(SwingConstants.CENTER);
@@ -228,7 +247,7 @@ public class Query6Panel extends JPanel {
         int totalUsers = (Integer) bookData.get("TotalUsers");
         String avgRating = bookData.get("AverageRating").toString();
         
-        JLabel statsLabel = new JLabel("👥 " + totalUsers + " users added  |  ⭐ " + avgRating + " avg rating");
+        JLabel statsLabel = new JLabel(totalUsers + " users added  |  " + avgRating + " avg rating");
         statsLabel.setFont(new Font("Arial", Font.PLAIN, 13));
         infoPanel.add(statsLabel);
         

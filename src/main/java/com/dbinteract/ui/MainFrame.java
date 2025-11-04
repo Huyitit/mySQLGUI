@@ -18,14 +18,15 @@ public class MainFrame extends JFrame {
     // Panels
     private LoginPanel loginPanel;
     private RegisterPanel registerPanel;
+    private HomePage homePage;
     private DashboardPanel dashboardPanel;
-    private Query1Panel query1Panel;
-    private Query2Panel query2Panel;
-    private Query3Panel query3Panel;
-    private Query4Panel query4Panel;
-    private Query5Panel query5Panel;
-    private Query6Panel query6Panel;
-    private Query7Panel query7Panel;
+    private MyLibraryPanel myLibraryPanel;
+    private BrowseBooksPanel browseBooksPanel;
+    private MyBookmarksPanel myBookmarksPanel;
+    private MyCollectionsPanel myCollectionsPanel;
+    private BookRatingsPanel bookRatingsPanel;
+    private PopularBooksPanel popularBooksPanel;
+    private AddBookPanel addBookPanel;
     
     public MainFrame() {
         initializeFrame();
@@ -50,26 +51,28 @@ public class MainFrame extends JFrame {
         // Initialize all panels
         loginPanel = new LoginPanel(this);
         registerPanel = new RegisterPanel(this);
+        homePage = new HomePage(this);
         dashboardPanel = new DashboardPanel(this);
-        query1Panel = new Query1Panel(this);
-        query2Panel = new Query2Panel(this);
-        query3Panel = new Query3Panel(this);
-        query4Panel = new Query4Panel(this);
-        query5Panel = new Query5Panel(this);
-        query6Panel = new Query6Panel(this);
-        query7Panel = new Query7Panel(this);
+        myLibraryPanel = new MyLibraryPanel(this);
+        browseBooksPanel = new BrowseBooksPanel(this);
+        myBookmarksPanel = new MyBookmarksPanel(this);
+        myCollectionsPanel = new MyCollectionsPanel(this);
+        bookRatingsPanel = new BookRatingsPanel(this);
+        popularBooksPanel = new PopularBooksPanel(this);
+        addBookPanel = new AddBookPanel(this);
         
         // Add panels to card layout
         contentPanel.add(loginPanel, Constants.PANEL_LOGIN);
         contentPanel.add(registerPanel, Constants.PANEL_REGISTER);
+        contentPanel.add(homePage, Constants.PANEL_HOME);
         contentPanel.add(dashboardPanel, Constants.PANEL_DASHBOARD);
-        contentPanel.add(query1Panel, Constants.PANEL_QUERY1);
-        contentPanel.add(query2Panel, Constants.PANEL_QUERY2);
-        contentPanel.add(query3Panel, Constants.PANEL_QUERY3);
-        contentPanel.add(query4Panel, Constants.PANEL_QUERY4);
-        contentPanel.add(query5Panel, Constants.PANEL_QUERY5);
-        contentPanel.add(query6Panel, Constants.PANEL_QUERY6);
-        contentPanel.add(query7Panel, Constants.PANEL_QUERY7);
+        contentPanel.add(myLibraryPanel, Constants.PANEL_QUERY1);
+        contentPanel.add(browseBooksPanel, Constants.PANEL_QUERY2);
+        contentPanel.add(myBookmarksPanel, Constants.PANEL_QUERY3);
+        contentPanel.add(myCollectionsPanel, Constants.PANEL_QUERY4);
+        contentPanel.add(bookRatingsPanel, Constants.PANEL_QUERY5);
+        contentPanel.add(popularBooksPanel, Constants.PANEL_QUERY6);
+        contentPanel.add(addBookPanel, Constants.PANEL_QUERY7);
     }
     
     public void showPanel(String panelName) {
@@ -82,7 +85,10 @@ public class MainFrame extends JFrame {
     
     public void setCurrentUser(User user) {
         this.currentUser = user;
-        // Update dashboard with user info
+        // Update home page and dashboard with user info
+        if (homePage != null && user != null) {
+            homePage.updateUserInfo();
+        }
         if (dashboardPanel != null && user != null) {
             dashboardPanel.updateUserInfo();
         }

@@ -1,32 +1,33 @@
-/home/huygraf/Desktop/dbTool/mySQLGUI/src/main/java/com/dbinteract/models/Bookmark.java
-/home/huygraf/Desktop/dbTool/mySQLGUI/src/main/java/com/dbinteract/dao/AuthorDAO.java
-/home/huygraf/Desktop/dbTool/mySQLGUI/src/main/java/com/dbinteract/dao/BookmarkDAO.java
-/home/huygraf/Desktop/dbTool/mySQLGUI/src/main/java/com/dbinteract/models/Author.java
-/home/huygraf/Desktop/dbTool/mySQLGUI/src/main/java/com/dbinteract/dao/GenreDAO.java
-/home/huygraf/Desktop/dbTool/mySQLGUI/src/main/java/com/dbinteract/ui/Query5Panel.java
-/home/huygraf/Desktop/dbTool/mySQLGUI/src/main/java/com/dbinteract/ui/Query3Panel.java
-/home/huygraf/Desktop/dbTool/mySQLGUI/src/main/java/com/dbinteract/Main.java
-/home/huygraf/Desktop/dbTool/mySQLGUI/src/main/java/com/dbinteract/utils/Constants.java
-/home/huygraf/Desktop/dbTool/mySQLGUI/src/main/java/com/dbinteract/ui/Query2Panel.java
-/home/huygraf/Desktop/dbTool/mySQLGUI/src/main/java/com/dbinteract/database/ConnectionManager.java
-/home/huygraf/Desktop/dbTool/mySQLGUI/src/main/java/com/dbinteract/ui/MainFrame.java
-/home/huygraf/Desktop/dbTool/mySQLGUI/src/main/java/com/dbinteract/dao/BookDAO.java
-/home/huygraf/Desktop/dbTool/mySQLGUI/src/main/java/com/dbinteract/models/Genre.java
-/home/huygraf/Desktop/dbTool/mySQLGUI/src/main/java/com/dbinteract/ui/LoginPanel.java
-/home/huygraf/Desktop/dbTool/mySQLGUI/src/main/java/com/dbinteract/ui/RegisterPanel.java
-/home/huygraf/Desktop/dbTool/mySQLGUI/src/main/java/com/dbinteract/utils/PasswordHasher.java
-/home/huygraf/Desktop/dbTool/mySQLGUI/src/main/java/com/dbinteract/models/Publisher.java
-/home/huygraf/Desktop/dbTool/mySQLGUI/src/main/java/com/dbinteract/dao/PublisherDAO.java
-/home/huygraf/Desktop/dbTool/mySQLGUI/src/main/java/com/dbinteract/ui/Query7Panel.java
-/home/huygraf/Desktop/dbTool/mySQLGUI/src/main/java/com/dbinteract/models/User.java
-/home/huygraf/Desktop/dbTool/mySQLGUI/src/main/java/com/dbinteract/ui/DashboardPanel.java
-/home/huygraf/Desktop/dbTool/mySQLGUI/src/main/java/com/dbinteract/ui/Query6Panel.java
-/home/huygraf/Desktop/dbTool/mySQLGUI/src/main/java/com/dbinteract/dao/UserBookDAO.java
-/home/huygraf/Desktop/dbTool/mySQLGUI/src/main/java/com/dbinteract/ui/Query4Panel.java
-/home/huygraf/Desktop/dbTool/mySQLGUI/src/main/java/com/dbinteract/models/UserBook.java
-/home/huygraf/Desktop/dbTool/mySQLGUI/src/main/java/com/dbinteract/utils/ConfigLoader.java
-/home/huygraf/Desktop/dbTool/mySQLGUI/src/main/java/com/dbinteract/dao/UserDAO.java
-/home/huygraf/Desktop/dbTool/mySQLGUI/src/main/java/com/dbinteract/dao/CollectionDAO.java
-/home/huygraf/Desktop/dbTool/mySQLGUI/src/main/java/com/dbinteract/models/Book.java
-/home/huygraf/Desktop/dbTool/mySQLGUI/src/main/java/com/dbinteract/models/Collection.java
-/home/huygraf/Desktop/dbTool/mySQLGUI/src/main/java/com/dbinteract/ui/Query1Panel.java
+D:\PTIT\NamThree\Ki 1 2025 - 2026\Projects\mySQLGUI\src\main\java\com\dbinteract\models\Publisher.java
+D:\PTIT\NamThree\Ki 1 2025 - 2026\Projects\mySQLGUI\src\main\java\com\dbinteract\models\Genre.java
+D:\PTIT\NamThree\Ki 1 2025 - 2026\Projects\mySQLGUI\src\main\java\com\dbinteract\dao\GenreDAO.java
+D:\PTIT\NamThree\Ki 1 2025 - 2026\Projects\mySQLGUI\src\main\java\com\dbinteract\dao\PublisherDAO.java
+D:\PTIT\NamThree\Ki 1 2025 - 2026\Projects\mySQLGUI\src\main\java\com\dbinteract\ui\PopularBooksPanel.java
+D:\PTIT\NamThree\Ki 1 2025 - 2026\Projects\mySQLGUI\src\main\java\com\dbinteract\models\Book.java
+D:\PTIT\NamThree\Ki 1 2025 - 2026\Projects\mySQLGUI\src\main\java\com\dbinteract\utils\PasswordHasher.java
+D:\PTIT\NamThree\Ki 1 2025 - 2026\Projects\mySQLGUI\src\main\java\com\dbinteract\ui\LoginPanel.java
+D:\PTIT\NamThree\Ki 1 2025 - 2026\Projects\mySQLGUI\src\main\java\com\dbinteract\dao\BookDAO.java
+D:\PTIT\NamThree\Ki 1 2025 - 2026\Projects\mySQLGUI\src\main\java\com\dbinteract\ui\RegisterPanel.java
+D:\PTIT\NamThree\Ki 1 2025 - 2026\Projects\mySQLGUI\src\main\java\com\dbinteract\ui\AddBookPanel.java
+D:\PTIT\NamThree\Ki 1 2025 - 2026\Projects\mySQLGUI\src\main\java\com\dbinteract\utils\Constants.java
+D:\PTIT\NamThree\Ki 1 2025 - 2026\Projects\mySQLGUI\src\main\java\com\dbinteract\ui\HomePage.java
+D:\PTIT\NamThree\Ki 1 2025 - 2026\Projects\mySQLGUI\src\main\java\com\dbinteract\ui\BrowseBooksPanel.java
+D:\PTIT\NamThree\Ki 1 2025 - 2026\Projects\mySQLGUI\src\main\java\com\dbinteract\dao\AuthorDAO.java
+D:\PTIT\NamThree\Ki 1 2025 - 2026\Projects\mySQLGUI\src\main\java\com\dbinteract\dao\BookmarkDAO.java
+D:\PTIT\NamThree\Ki 1 2025 - 2026\Projects\mySQLGUI\src\main\java\com\dbinteract\ui\BookRatingsPanel.java
+D:\PTIT\NamThree\Ki 1 2025 - 2026\Projects\mySQLGUI\src\main\java\com\dbinteract\ui\DashboardPanel.java
+D:\PTIT\NamThree\Ki 1 2025 - 2026\Projects\mySQLGUI\src\main\java\com\dbinteract\models\Author.java
+D:\PTIT\NamThree\Ki 1 2025 - 2026\Projects\mySQLGUI\src\main\java\com\dbinteract\models\User.java
+D:\PTIT\NamThree\Ki 1 2025 - 2026\Projects\mySQLGUI\src\main\java\com\dbinteract\models\Collection.java
+D:\PTIT\NamThree\Ki 1 2025 - 2026\Projects\mySQLGUI\src\main\java\com\dbinteract\ui\MainFrame.java
+D:\PTIT\NamThree\Ki 1 2025 - 2026\Projects\mySQLGUI\src\main\java\com\dbinteract\ui\MyLibraryPanel.java
+D:\PTIT\NamThree\Ki 1 2025 - 2026\Projects\mySQLGUI\src\main\java\com\dbinteract\dao\UserBookDAO.java
+D:\PTIT\NamThree\Ki 1 2025 - 2026\Projects\mySQLGUI\src\main\java\com\dbinteract\models\Bookmark.java
+D:\PTIT\NamThree\Ki 1 2025 - 2026\Projects\mySQLGUI\src\main\java\com\dbinteract\ui\MyBookmarksPanel.java
+D:\PTIT\NamThree\Ki 1 2025 - 2026\Projects\mySQLGUI\src\main\java\com\dbinteract\ui\MyCollectionsPanel.java
+D:\PTIT\NamThree\Ki 1 2025 - 2026\Projects\mySQLGUI\src\main\java\com\dbinteract\models\UserBook.java
+D:\PTIT\NamThree\Ki 1 2025 - 2026\Projects\mySQLGUI\src\main\java\com\dbinteract\database\ConnectionManager.java
+D:\PTIT\NamThree\Ki 1 2025 - 2026\Projects\mySQLGUI\src\main\java\com\dbinteract\dao\UserDAO.java
+D:\PTIT\NamThree\Ki 1 2025 - 2026\Projects\mySQLGUI\src\main\java\com\dbinteract\dao\CollectionDAO.java
+D:\PTIT\NamThree\Ki 1 2025 - 2026\Projects\mySQLGUI\src\main\java\com\dbinteract\Main.java
+D:\PTIT\NamThree\Ki 1 2025 - 2026\Projects\mySQLGUI\src\main\java\com\dbinteract\utils\ConfigLoader.java

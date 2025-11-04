@@ -23,6 +23,7 @@ public class Constants {
     // Panel names (for CardLayout)
     public static final String PANEL_LOGIN = "login";
     public static final String PANEL_REGISTER = "register";
+    public static final String PANEL_HOME = "home";
     public static final String PANEL_DASHBOARD = "dashboard";
     public static final String PANEL_QUERY1 = "query1";
     public static final String PANEL_QUERY2 = "query2";

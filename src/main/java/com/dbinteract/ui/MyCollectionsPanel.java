@@ -11,9 +11,9 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Query 4 Panel: Books in a collection
+ * My Collections Panel: Books in a collection
  */
-public class Query4Panel extends JPanel {
+public class MyCollectionsPanel extends JPanel {
     
     private MainFrame mainFrame;
     private JTable resultTable;
@@ -21,9 +21,17 @@ public class Query4Panel extends JPanel {
     private JLabel statusLabel;
     private JComboBox<String> collectionComboBox;
     
-    public Query4Panel(MainFrame mainFrame) {
+    public MyCollectionsPanel(MainFrame mainFrame) {
         this.mainFrame = mainFrame;
         initializeUI();
+    }
+    
+    @Override
+    public void setVisible(boolean visible) {
+        super.setVisible(visible);
+        if (visible) {
+            loadCollections();
+        }
     }
     
     private void initializeUI() {
@@ -39,63 +47,64 @@ public class Query4Panel extends JPanel {
         JPanel mainPanel = new JPanel(new BorderLayout());
         
         JPanel panel = new JPanel(new BorderLayout());
-        panel.setBackground(new Color(52, 73, 94));
-        panel.setBorder(BorderFactory.createEmptyBorder(15, 20, 15, 20));
+        panel.setBackground(new Color(26, 188, 156));
+        panel.setBorder(BorderFactory.createEmptyBorder(20, 30, 20, 30));
         
-        JLabel titleLabel = new JLabel("📂 Query 4: My Collections");
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 18));
+        JPanel leftPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        leftPanel.setOpaque(false);
+        
+        JLabel titleLabel = new JLabel("My Collections");
+        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 24));
         titleLabel.setForeground(Color.WHITE);
-        panel.add(titleLabel, BorderLayout.WEST);
+        leftPanel.add(titleLabel);
         
-        JButton backButton = new JButton("← Back");
-        backButton.setBackground(new Color(52, 152, 219));
+        panel.add(leftPanel, BorderLayout.WEST);
+        
+        JButton backButton = new JButton("Back to Home");
+        backButton.setBackground(new Color(23, 124, 122));
         backButton.setForeground(Color.WHITE);
+        backButton.setFont(new Font("Segoe UI", Font.BOLD, 14));
         backButton.setBorderPainted(false);
         backButton.setFocusPainted(false);
-        backButton.addActionListener(e -> mainFrame.showPanel(Constants.PANEL_DASHBOARD));
+        backButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        backButton.setPreferredSize(new Dimension(150, 35));
+        backButton.setOpaque(true);
+        backButton.addActionListener(e -> mainFrame.showPanel(Constants.PANEL_HOME));
         panel.add(backButton, BorderLayout.EAST);
         
         mainPanel.add(panel, BorderLayout.NORTH);
         
-        // SQL and controls panel
-        JPanel sqlPanel = new JPanel(new BorderLayout());
-        sqlPanel.setBackground(new Color(236, 240, 241));
-        sqlPanel.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createMatteBorder(0, 0, 1, 0, new Color(189, 195, 199)),
-            BorderFactory.createEmptyBorder(10, 20, 10, 20)
-        ));
+        // Controls panel
+        JPanel controlsPanel = new JPanel(new BorderLayout());
+        controlsPanel.setBackground(new Color(240, 248, 255));
+        controlsPanel.setBorder(BorderFactory.createEmptyBorder(15, 30, 15, 30));
         
-        JLabel sqlLabel = new JLabel("<html><b>SQL:</b> SELECT b.Name, a.AuthorName<br>" +
-                "FROM COLLECTIONBOOK cb JOIN COLLECTION c ... WHERE u.UserName = ? AND c.CollectionName = ?</html>");
-        sqlLabel.setFont(new Font("Monospaced", Font.PLAIN, 11));
-        sqlPanel.add(sqlLabel, BorderLayout.NORTH);
+        JPanel leftControls = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
+        leftControls.setOpaque(false);
         
-        JPanel controlPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        controlPanel.setOpaque(false);
-        controlPanel.add(new JLabel("Select Collection:"));
+        JLabel collLabel = new JLabel("Select Collection:");
+        collLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        leftControls.add(collLabel);
         
         collectionComboBox = new JComboBox<>();
-        collectionComboBox.setPreferredSize(new Dimension(250, 30));
-        controlPanel.add(collectionComboBox);
+        collectionComboBox.setPreferredSize(new Dimension(250, 35));
+        collectionComboBox.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        leftControls.add(collectionComboBox);
         
-        JButton loadButton = new JButton("Load My Collections");
-        loadButton.setBackground(new Color(52, 152, 219));
-        loadButton.setForeground(Color.WHITE);
-        loadButton.setBorderPainted(false);
-        loadButton.setFocusPainted(false);
-        loadButton.addActionListener(e -> loadCollections());
-        controlPanel.add(loadButton);
+        JButton viewButton = new JButton("View Books");
+        viewButton.setBackground(new Color(39, 174, 96));
+        viewButton.setForeground(Color.WHITE);
+        viewButton.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        viewButton.setBorderPainted(false);
+        viewButton.setFocusPainted(false);
+        viewButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        viewButton.setPreferredSize(new Dimension(120, 35));
+        viewButton.setOpaque(true);
+        viewButton.addActionListener(e -> executeQuery());
+        leftControls.add(viewButton);
         
-        JButton executeButton = new JButton("Execute Query");
-        executeButton.setBackground(new Color(39, 174, 96));
-        executeButton.setForeground(Color.WHITE);
-        executeButton.setBorderPainted(false);
-        executeButton.setFocusPainted(false);
-        executeButton.addActionListener(e -> executeQuery());
-        controlPanel.add(executeButton);
-        
-        sqlPanel.add(controlPanel, BorderLayout.CENTER);
-        mainPanel.add(sqlPanel, BorderLayout.SOUTH);
+        controlsPanel.add(leftControls, BorderLayout.WEST);
+        mainPanel.add(controlsPanel, BorderLayout.SOUTH);
         
         return mainPanel;
     }
@@ -197,11 +206,12 @@ public class Query4Panel extends JPanel {
                         });
                     }
                     
-                    statusLabel.setText("Results: " + results.size() + " books found in collection '" + selectedCollection + "'");
+                                        
+                    statusLabel.setText(results.size() + " book" + (results.size() != 1 ? "s" : "") + " in collection '" + selectedCollection + "'");
                     
                 } catch (Exception e) {
                     statusLabel.setText("Error: " + e.getMessage());
-                    JOptionPane.showMessageDialog(Query4Panel.this,
+                    JOptionPane.showMessageDialog(MyCollectionsPanel.this,
                         "Failed to execute query: " + e.getMessage(),
                         "Query Error",
                         JOptionPane.ERROR_MESSAGE);

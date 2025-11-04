@@ -11,10 +11,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Query 7 Panel: Add New Book to Database
+ * Add Book Panel: Add New Book to Database
  * Allows users to insert their own books with authors and genres
  */
-public class Query7Panel extends JPanel {
+public class AddBookPanel extends JPanel {
     
     private MainFrame mainFrame;
     private JLabel statusLabel;
@@ -38,7 +38,7 @@ public class Query7Panel extends JPanel {
     private List<Genre> availableGenres;
     private JTextField newGenreField;
     
-    public Query7Panel(MainFrame mainFrame) {
+    public AddBookPanel(MainFrame mainFrame) {
         this.mainFrame = mainFrame;
         this.availableAuthors = new ArrayList<>();
         this.availableGenres = new ArrayList<>();
@@ -73,38 +73,44 @@ public class Query7Panel extends JPanel {
         JPanel mainPanel = new JPanel(new BorderLayout());
         
         JPanel panel = new JPanel(new BorderLayout());
-        panel.setBackground(new Color(52, 73, 94));
-        panel.setBorder(BorderFactory.createEmptyBorder(15, 20, 15, 20));
+        panel.setBackground(new Color(39, 174, 96));
+        panel.setBorder(BorderFactory.createEmptyBorder(20, 30, 20, 30));
         
-        JLabel titleLabel = new JLabel("➕ Query 7: Add New Book");
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 18));
+        JPanel leftPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        leftPanel.setOpaque(false);
+        
+        JLabel titleLabel = new JLabel("Add New Book");
+        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 24));
         titleLabel.setForeground(Color.WHITE);
-        panel.add(titleLabel, BorderLayout.WEST);
+        leftPanel.add(titleLabel);
         
-        JButton backButton = new JButton("← Back");
-        backButton.setBackground(new Color(52, 152, 219));
+        panel.add(leftPanel, BorderLayout.WEST);
+        
+        JButton backButton = new JButton("Back to Home");
+        backButton.setBackground(new Color(56, 142, 60));
         backButton.setForeground(Color.WHITE);
+        backButton.setFont(new Font("Segoe UI", Font.BOLD, 14));
         backButton.setBorderPainted(false);
         backButton.setFocusPainted(false);
-        backButton.addActionListener(e -> mainFrame.showPanel(Constants.PANEL_DASHBOARD));
+        backButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        backButton.setPreferredSize(new Dimension(150, 35));
+        backButton.setOpaque(true);
+        backButton.addActionListener(e -> mainFrame.showPanel(Constants.PANEL_HOME));
         panel.add(backButton, BorderLayout.EAST);
         
         mainPanel.add(panel, BorderLayout.NORTH);
         
-        // SQL info panel
-        JPanel sqlPanel = new JPanel(new BorderLayout());
-        sqlPanel.setBackground(new Color(236, 240, 241));
-        sqlPanel.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createMatteBorder(0, 0, 1, 0, new Color(189, 195, 199)),
-            BorderFactory.createEmptyBorder(10, 20, 10, 20)
-        ));
+        // Subtitle panel
+        JPanel subtitlePanel = new JPanel(new BorderLayout());
+        subtitlePanel.setBackground(new Color(240, 248, 255));
+        subtitlePanel.setBorder(BorderFactory.createEmptyBorder(15, 30, 15, 30));
         
-        JLabel sqlLabel = new JLabel("<html><b>SQL Operations:</b> INSERT INTO BOOK, AUTHORBOOK, GENREBOOK<br>" +
-                "This form will add a new book and link it to authors and genres</html>");
-        sqlLabel.setFont(new Font("Monospaced", Font.PLAIN, 11));
-        sqlPanel.add(sqlLabel, BorderLayout.CENTER);
+        JLabel subtitleLabel = new JLabel("Fill in the book details below to add a new book to the library");
+        subtitleLabel.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        subtitleLabel.setForeground(new Color(52, 73, 94));
+        subtitlePanel.add(subtitleLabel, BorderLayout.WEST);
         
-        mainPanel.add(sqlPanel, BorderLayout.SOUTH);
+        mainPanel.add(subtitlePanel, BorderLayout.SOUTH);
         
         return mainPanel;
     }
@@ -115,7 +121,7 @@ public class Query7Panel extends JPanel {
         panel.setBackground(Color.WHITE);
         
         // Section 1: Book Information
-        panel.add(createSectionTitle("📖 STEP 1: Book Information"));
+        panel.add(createSectionTitle("STEP 1: Book Information"));
         panel.add(createBookInfoSection());
         panel.add(Box.createVerticalStrut(20));
         
@@ -621,7 +627,7 @@ public class Query7Panel extends JPanel {
                     Boolean success = get();
                     
                     if (success) {
-                        showSuccess("✅ Book '" + bookTitle + "' successfully added to database!");
+                        showSuccess("Book '" + bookTitle + "' successfully added to database!");
                         clearForm();
                         loadAuthors(); // Refresh lists
                         loadGenres();

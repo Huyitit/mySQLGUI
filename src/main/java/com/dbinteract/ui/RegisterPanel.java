@@ -33,7 +33,7 @@ public class RegisterPanel extends JPanel {
         gbc.insets = new Insets(5, 5, 5, 5);
         
         // Title
-        JLabel titleLabel = new JLabel("📝 Create New Account");
+        JLabel titleLabel = new JLabel("Create New Account");
         titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
         gbc.gridx = 0;
         gbc.gridy = 0;
@@ -225,7 +225,7 @@ public class RegisterPanel extends JPanel {
                         showSuccess("Account created successfully! You can now login.");
                         
                         // Clear fields
-                        clearFields();
+                        // clearFields();
                         
                         // Redirect to login after 2 seconds
                         Timer timer = new Timer(2000, e -> {
@@ -257,7 +257,7 @@ public class RegisterPanel extends JPanel {
     }
     
     private void showSuccess(String message) {
-        messageLabel.setText("✅ " + message);
+        messageLabel.setText(message);
         messageLabel.setForeground(new Color(39, 174, 96));
     }
     
