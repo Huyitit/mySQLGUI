@@ -26,7 +26,6 @@ public class PasswordHasher {
      */
     public static boolean verifyPassword(String plainPassword, String hashedPassword) {
         try {
-            System.out.println("Verifying password: " + PasswordHasher.hashPassword(plainPassword) + " against hash: " + hashedPassword);
             return BCrypt.checkpw(plainPassword,hashedPassword);
         } catch (Exception e) {
             System.err.println("Error verifying password: " + e.getMessage());
