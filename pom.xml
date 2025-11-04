@@ -5,13 +5,13 @@
          http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.dbinteract</groupId>
+    <groupId>com.library</groupId>
     <artifactId>mySQLGUI</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
-    <name>Book Library Manager</name>
-    <description>Simple book library management system with 6 core queries</description>
+    <name>Library Management System</name>
+    <description>Library management system for managing books, users, authors, and more</description>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -62,10 +62,10 @@
                         <configuration>
                             <transformers>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>com.dbinteract.Main</mainClass>
+                                    <mainClass>com.library.Main</mainClass>
                                 </transformer>
                             </transformers>
-                            <finalName>BookLibraryManager</finalName>
+                            <finalName>LibraryManagementSystem</finalName>
                         </configuration>
                     </execution>
                 </executions>
