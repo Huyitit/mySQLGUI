@@ -341,4 +341,69 @@ public class BookDAO {
             stmt.executeBatch();
         }
     }
+    
+    /**
+     * Add an author to a book
+     */
+    public void addAuthorToBook(int bookId, int authorId) throws SQLException {
+        String sql = "INSERT IGNORE INTO AUTHORBOOK (AuthorId, BookId) VALUES (?, ?)";
+        
+        try (Connection conn = ConnectionManager.getInstance().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setInt(1, authorId);
+            stmt.setInt(2, bookId);
+            stmt.executeUpdate();
+        }
+    }
+    
+    /**
+     * Get all books uploaded by a specific user
+     */
+    public List<Map<String, Object>> getBooksByUploader(int userId) throws SQLException {
+        List<Map<String, Object>> results = new ArrayList<>();
+        
+        String sql = "SELECT " +
+                "    b.BookId, " +
+                "    b.Name AS title, " +
+                "    GROUP_CONCAT(DISTINCT a.AuthorName SEPARATOR ', ') AS authors, " +
+                "    p.PublisherName AS publisher, " +
+                "    GROUP_CONCAT(DISTINCT g.GenreName SEPARATOR ', ') AS genres, " +
+                "    b.Language, " +
+                "    b.PublishedDate AS publishedDate, " +
+                "    b.Format " +
+                "FROM BOOK b " +
+                "LEFT JOIN AUTHORBOOK ab ON b.BookId = ab.BookId " +
+                "LEFT JOIN AUTHOR a ON ab.AuthorId = a.AuthorId " +
+                "LEFT JOIN PUBLISHER p ON b.PublisherId = p.PublisherId " +
+                "LEFT JOIN GENREBOOK gb ON b.BookId = gb.BookId " +
+                "LEFT JOIN GENRE g ON gb.GenreId = g.GenreId " +
+                "WHERE b.UploaderId = ? " +
+                "GROUP BY b.BookId, b.Name, p.PublisherName, b.Language, b.PublishedDate, b.Format " +
+                "ORDER BY b.BookId DESC";
+        
+        try (Connection conn = ConnectionManager.getInstance().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setInt(1, userId);
+            
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    Map<String, Object> book = new HashMap<>();
+                    book.put("bookId", rs.getInt("BookId"));
+                    book.put("title", rs.getString("title"));
+                    book.put("authors", rs.getString("authors"));
+                    book.put("publisher", rs.getString("publisher"));
+                    book.put("genres", rs.getString("genres"));
+                    book.put("language", rs.getString("Language"));
+                    book.put("publishedDate", rs.getDate("publishedDate") != null ? 
+                        rs.getDate("publishedDate").toString() : null);
+                    book.put("format", rs.getString("Format"));
+                    results.add(book);
+                }
+            }
+        }
+        
+        return results;
+    }
 }

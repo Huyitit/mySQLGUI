@@ -690,14 +690,25 @@ function displayCollections(collections) {
       <div class="collection-count">${collection.bookCount} book${collection.bookCount !== 1 ? 's' : ''}</div>
       <div class="collection-date">Created: ${new Date(collection.createdDate).toLocaleDateString()}</div>
       <div class="collection-actions">
-        <button class="btn btn-small" onclick="viewCollection(${collection.collectionId}, '${collection.collectionName.replace(/'/g, "\\'")}')">
+        <button class="btn btn-small view-collection-btn" data-collection-id="${collection.collectionId}" data-collection-name="${collection.collectionName}">
           View Books
         </button>
-        <button class="btn btn-small btn-danger" onclick="deleteCollectionConfirm(${collection.collectionId})">
+        <button class="btn btn-small btn-danger delete-collection-btn" data-collection-id="${collection.collectionId}">
           Delete
         </button>
       </div>
     `;
+    
+    // Add event listeners
+    const viewBtn = card.querySelector('.view-collection-btn');
+    viewBtn.addEventListener('click', () => {
+      viewCollection(collection.collectionId, collection.collectionName);
+    });
+    
+    const deleteBtn = card.querySelector('.delete-collection-btn');
+    deleteBtn.addEventListener('click', () => {
+      deleteCollectionConfirm(collection.collectionId);
+    });
     
     container.appendChild(card);
   });
@@ -762,26 +773,70 @@ async function deleteCollectionConfirm(collectionId) {
 }
 
 async function viewCollection(collectionId, collectionName) {
-  // For now, just show an alert. We can create a dedicated page later
+  console.log("viewCollection called with:", collectionId, collectionName);
   try {
-    const response = await fetch(`${API_URL}/collections/${collectionId}/books`, {
+    const url = `${API_URL}/collections/${collectionId}/books`;
+    console.log("Fetching from:", url);
+    
+    const response = await fetch(url, {
       headers: getAuthHeaders(),
     });
     
+    console.log("Response status:", response.status);
+    
     if (response.ok) {
       const books = await response.json();
+      console.log("Books received:", books);
+      
+      // Update modal title
+      document.getElementById('collectionModalTitle').textContent = `📚 ${collectionName}`;
+      
+      const container = document.getElementById('collectionBooksContent');
       
       if (books.length === 0) {
-        alert(`Collection "${collectionName}" is empty.`);
+        container.innerHTML = '<p style="text-align: center; padding: 2rem; color: #999;">This collection is empty.</p>';
       } else {
-        const bookList = books.map(b => `- ${b.name} by ${b.authors || 'Unknown'}`).join('\n');
-        alert(`Books in "${collectionName}":\n\n${bookList}`);
+        // Display books in a grid
+        container.innerHTML = books.map(book => `
+          <div class="book-card">
+            <div class="book-cover">
+              <span class="book-icon">📖</span>
+            </div>
+            <div class="book-info">
+              <h3>${book.name || 'Untitled'}</h3>
+              <p class="author">${book.authors || 'Unknown Author'}</p>
+              <p class="meta">
+                <span>🌐 ${book.language || 'Unknown'}</span>
+                <span>📄 ${book.format || 'Unknown'}</span>
+              </p>
+              <div class="book-actions" style="margin-top: 0.5rem;">
+                <button onclick="readBook(${book.bookId})" class="btn btn-small">
+                  📖 Read
+                </button>
+                <button onclick="showBookInfo(${book.bookId}, false)" class="btn btn-small" style="background: #17a2b8;">
+                  ℹ️ Info
+                </button>
+              </div>
+            </div>
+          </div>
+        `).join('');
       }
+      
+      // Show modal
+      document.getElementById('collectionBooksModal').style.display = 'block';
+    } else {
+      const errorText = await response.text();
+      console.error("Error response:", errorText);
+      alert('Failed to load collection books');
     }
   } catch (error) {
     console.error("Error viewing collection:", error);
-    alert('Failed to load collection books');
+    alert('Failed to load collection books: ' + error.message);
   }
+}
+
+function closeCollectionBooksModal() {
+  document.getElementById('collectionBooksModal').style.display = 'none';
 }
 
 async function addBookToCollection(bookId) {
@@ -839,3 +894,16 @@ async function addBookToCollection(bookId) {
     alert('Failed to add book to collection');
   }
 }
+
+// Close modal when clicking outside
+window.onclick = function(event) {
+  const collectionModal = document.getElementById('collectionBooksModal');
+  const bookInfoModal = document.getElementById('bookInfoModal');
+  
+  if (event.target === collectionModal) {
+    collectionModal.style.display = 'none';
+  }
+  if (event.target === bookInfoModal) {
+    bookInfoModal.style.display = 'none';
+  }
+};

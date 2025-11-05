@@ -194,14 +194,14 @@ public class CollectionDAO {
     public List<Map<String, Object>> getBooksInCollection(int collectionId) throws SQLException {
         List<Map<String, Object>> books = new ArrayList<>();
         
-        String sql = "SELECT b.BookId, b.Name, b.Language, b.Format, b.PublishedDate, " +
+        String sql = "SELECT b.BookId, b.Name, b.Language, b.Format, " +
                     "GROUP_CONCAT(DISTINCT a.AuthorName SEPARATOR ', ') AS Authors " +
                     "FROM BOOK b " +
                     "JOIN COLLECTIONBOOK cb ON b.BookId = cb.BookId " +
                     "LEFT JOIN AUTHORBOOK ab ON b.BookId = ab.BookId " +
                     "LEFT JOIN AUTHOR a ON ab.AuthorId = a.AuthorId " +
                     "WHERE cb.CollectionId = ? " +
-                    "GROUP BY b.BookId, b.Name, b.Language, b.Format, b.PublishedDate";
+                    "GROUP BY b.BookId, b.Name, b.Language, b.Format";
         
         try (Connection conn = ConnectionManager.getInstance().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -215,7 +215,6 @@ public class CollectionDAO {
                     book.put("name", rs.getString("Name"));
                     book.put("language", rs.getString("Language"));
                     book.put("format", rs.getString("Format"));
-                    book.put("publishedDate", rs.getString("PublishedDate"));
                     book.put("authors", rs.getString("Authors"));
                     books.add(book);
                 }

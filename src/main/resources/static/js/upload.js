@@ -1,5 +1,9 @@
 const API_URL = "http://localhost:8080/api";
 
+console.log("Upload.js loaded!");
+console.log("Genre input element:", document.getElementById("genres"));
+console.log("Genre suggestions element:", document.getElementById("genreSuggestions"));
+
 // Author autocomplete
 const authorInput = document.getElementById("author");
 const authorSuggestions = document.getElementById("authorSuggestions");
@@ -134,7 +138,9 @@ let selectedGenres = [];
 let genreDebounceTimer;
 
 if (genreInput) {
+  console.log("Genre input found, adding event listener");
   genreInput.addEventListener("input", (e) => {
+    console.log("Genre input event fired, value:", e.target.value);
     clearTimeout(genreDebounceTimer);
     const query = e.target.value.trim();
     
@@ -145,6 +151,7 @@ if (genreInput) {
     
     genreDebounceTimer = setTimeout(async () => {
       try {
+        console.log("Fetching genres for query:", query);
         const response = await fetch(`${API_URL}/genres/search?q=${encodeURIComponent(query)}`, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -153,7 +160,10 @@ if (genreInput) {
         
         if (response.ok) {
           const genres = await response.json();
+          console.log("Genres received from API:", genres);
           displayGenreSuggestions(genres);
+        } else {
+          console.log("Genre API response not OK:", response.status);
         }
       } catch (error) {
         console.error("Error fetching genres:", error);
@@ -170,28 +180,46 @@ if (genreInput) {
 }
 
 function displayGenreSuggestions(genres) {
+  console.log("displayGenreSuggestions called with:", genres);
   // Filter out already selected genres
   const availableGenres = genres.filter(g => 
     !selectedGenres.some(sg => sg.genreId === g.genreId)
   );
   
+  console.log("Available genres after filtering:", availableGenres);
+  
   if (availableGenres.length === 0) {
     genreSuggestions.classList.remove("show");
+    console.log("No available genres, hiding suggestions");
     return;
   }
   
   genreSuggestions.innerHTML = availableGenres
     .map(genre => `
-      <div class="suggestion-item" onclick="selectGenre(${genre.genreId}, '${genre.genreName.replace(/'/g, "\\'")}')">
+      <div class="suggestion-item" data-genre-id="${genre.genreId}" data-genre-name="${genre.genreName}">
         ${genre.genreName}
       </div>
     `)
     .join('');
   
+  console.log("Genre suggestions HTML created, adding event listeners");
+  
+  // Add click event listeners to each suggestion
+  genreSuggestions.querySelectorAll('.suggestion-item').forEach(item => {
+    item.addEventListener('click', () => {
+      const genreId = parseInt(item.dataset.genreId);
+      const genreName = item.dataset.genreName;
+      console.log("Genre clicked:", genreId, genreName);
+      alert(`Genre clicked: ${genreName} (ID: ${genreId})`); // TEMPORARY DEBUG
+      selectGenre(genreId, genreName);
+    });
+  });
+  
   genreSuggestions.classList.add("show");
 }
 
 function selectGenre(genreId, genreName) {
+  console.log("selectGenre called with:", genreId, genreName);
   // Add to selected genres
   if (!selectedGenres.some(g => g.genreId === genreId)) {
     selectedGenres.push({ genreId, genreName });
@@ -232,8 +260,21 @@ if (uploadForm) {
     const formData = new FormData(uploadForm);
     
     // Add selected genres as JSON
+    console.log("Selected genres before upload:", selectedGenres);
     if (selectedGenres.length > 0) {
-      formData.append("genreIds", JSON.stringify(selectedGenres.map(g => g.genreId)));
+      const genreIds = selectedGenres.map(g => g.genreId);
+      console.log("Genre IDs:", genreIds);
+      const genreIdsJson = JSON.stringify(genreIds);
+      console.log("Genre IDs JSON:", genreIdsJson);
+      formData.append("genreIds", genreIdsJson);
+    } else {
+      console.log("No genres selected!");
+    }
+    
+    // Log all FormData entries
+    console.log("FormData entries:");
+    for (let [key, value] of formData.entries()) {
+      console.log(key, ":", value);
     }
     
     const progressBar = document.getElementById("progressBar");
@@ -258,14 +299,13 @@ if (uploadForm) {
       xhr.addEventListener("load", () => {
         if (xhr.status === 201 || xhr.status === 200) {
           messageDiv.className = "message success-message";
-          messageDiv.textContent = "✅ Book uploaded successfully!";
+          messageDiv.textContent = "✅ Book uploaded successfully! Check console logs.";
           messageDiv.style.display = "block";
           uploadForm.reset();
           progressBar.style.display = "none";
 
-          setTimeout(() => {
-            window.location.href = "/library.html";
-          }, 2000);
+          console.log("Upload successful!");
+          // Redirect removed for debugging
         } else {
           const response = JSON.parse(xhr.responseText);
           throw new Error(response.error || "Upload failed");

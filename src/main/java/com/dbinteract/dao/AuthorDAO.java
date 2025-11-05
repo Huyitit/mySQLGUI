@@ -63,4 +63,62 @@ public class AuthorDAO {
         }
         return authors;
     }
+    
+    /**
+     * Find author by exact name
+     */
+    public Author findByName(String name) throws SQLException {
+        String sql = "SELECT * FROM AUTHOR WHERE AuthorName = ?";
+        
+        try (Connection conn = ConnectionManager.getInstance().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setString(1, name);
+            
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    Author author = new Author();
+                    author.setAuthorId(rs.getInt("AuthorId"));
+                    author.setAuthorName(rs.getString("AuthorName"));
+                    return author;
+                }
+            }
+        }
+        return null;
+    }
+    
+    /**
+     * Create a new author
+     */
+    public Author createAuthor(String name) throws SQLException {
+        String sql = "INSERT INTO AUTHOR (AuthorName) VALUES (?)";
+        
+        try (Connection conn = ConnectionManager.getInstance().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS)) {
+            
+            stmt.setString(1, name);
+            stmt.executeUpdate();
+            
+            try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    Author author = new Author();
+                    author.setAuthorId(generatedKeys.getInt(1));
+                    author.setAuthorName(name);
+                    return author;
+                }
+            }
+        }
+        throw new SQLException("Failed to create author, no ID obtained");
+    }
+    
+    /**
+     * Find or create author by name
+     */
+    public Author findOrCreateByName(String name) throws SQLException {
+        Author existing = findByName(name);
+        if (existing != null) {
+            return existing;
+        }
+        return createAuthor(name);
+    }
 }

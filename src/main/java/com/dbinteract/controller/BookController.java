@@ -25,9 +25,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.dbinteract.dao.AuthorDAO;
 import com.dbinteract.dao.BookDAO;
+import com.dbinteract.dao.PublisherDAO;
 import com.dbinteract.dao.UserBookDAO;
+import com.dbinteract.models.Author;
 import com.dbinteract.models.Book;
+import com.dbinteract.models.Publisher;
 import com.dbinteract.security.UserPrincipal;
 import com.dbinteract.service.FileStorageService;
 
@@ -37,13 +41,18 @@ public class BookController {
     
     private final BookDAO bookDAO;
     private final UserBookDAO userBookDAO;
+    private final AuthorDAO authorDAO;
+    private final PublisherDAO publisherDAO;
     private final FileStorageService fileStorageService;
     
     private static final Set<String> ALLOWED_EXTENSIONS = Set.of("pdf", "epub");
     
-    public BookController(BookDAO bookDAO, UserBookDAO userBookDAO, FileStorageService fileStorageService) {
+    public BookController(BookDAO bookDAO, UserBookDAO userBookDAO, AuthorDAO authorDAO, 
+                         PublisherDAO publisherDAO, FileStorageService fileStorageService) {
         this.bookDAO = bookDAO;
         this.userBookDAO = userBookDAO;
+        this.authorDAO = authorDAO;
+        this.publisherDAO = publisherDAO;
         this.fileStorageService = fileStorageService;
     }
     
@@ -126,11 +135,18 @@ public class BookController {
     public ResponseEntity<?> uploadBook(
             @RequestParam("title") String title,
             @RequestParam(value = "author", required = false) String author,
+            @RequestParam(value = "publisher", required = false) String publisher,
             @RequestParam(value = "published_date", required = false) String publishedDate,
             @RequestParam(value = "language", required = false) String language,
             @RequestParam(value = "genreIds", required = false) String genreIdsJson,
             @RequestParam("ebookContent") MultipartFile file,
             @AuthenticationPrincipal UserPrincipal userPrincipal) {
+        
+        System.out.println("=== UPLOAD BOOK REQUEST ===");
+        System.out.println("Title: " + title);
+        System.out.println("Author: " + author);
+        System.out.println("Publisher: " + publisher);
+        System.out.println("GenreIdsJson: " + genreIdsJson);
         
         try {
             // Validate user authentication
@@ -183,6 +199,13 @@ public class BookController {
                 format = "EPUB"; // Default to EPUB for other ebook formats
             }
             
+            // Handle publisher - find or create
+            Integer publisherId = null;
+            if (publisher != null && !publisher.trim().isEmpty()) {
+                Publisher publisherEntity = publisherDAO.findOrCreateByName(publisher.trim());
+                publisherId = publisherEntity.getPublisherId();
+            }
+            
             // Create new book
             Book newBook = new Book();
             newBook.setName(title);
@@ -190,26 +213,45 @@ public class BookController {
             newBook.setFormat(format);
             newBook.setFilePath(filePath);
             newBook.setUserId(uploaderId);
-            newBook.setPublisherId(null);
+            newBook.setPublisherId(publisherId);
             
             // Save to database
             bookDAO.addBook(newBook, uploaderId);
             
+            // Handle author - find or create and link to book
+            if (author != null && !author.trim().isEmpty()) {
+                try {
+                    Author authorEntity = authorDAO.findOrCreateByName(author.trim());
+                    bookDAO.addAuthorToBook(newBook.getBookId(), authorEntity.getAuthorId());
+                } catch (Exception e) {
+                    System.err.println("Failed to add author: " + e.getMessage());
+                    // Don't fail the whole upload if author link fails
+                }
+            }
+            
             // Add genres if provided
             if (genreIdsJson != null && !genreIdsJson.trim().isEmpty()) {
                 try {
+                    System.out.println("Received genreIdsJson: " + genreIdsJson);
                     // Parse genre IDs from JSON array
                     com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
                     List<Integer> genreIds = mapper.readValue(genreIdsJson, 
                         mapper.getTypeFactory().constructCollectionType(List.class, Integer.class));
                     
+                    System.out.println("Parsed genreIds: " + genreIds);
+                    System.out.println("BookId for genres: " + newBook.getBookId());
+                    
                     if (!genreIds.isEmpty()) {
                         bookDAO.addGenresToBook(newBook.getBookId(), genreIds);
+                        System.out.println("Successfully added genres to book");
                     }
                 } catch (Exception e) {
                     System.err.println("Failed to parse or add genres: " + e.getMessage());
+                    e.printStackTrace();
                     // Don't fail the whole upload if genres fail
                 }
+            } else {
+                System.out.println("No genres provided - genreIdsJson is: " + genreIdsJson);
             }
             
             return ResponseEntity.status(HttpStatus.CREATED).body(newBook);
@@ -219,6 +261,22 @@ public class BookController {
             Map<String, String> error = new HashMap<>();
             error.put("error", "Could not upload book: " + e.getMessage());
             return ResponseEntity.internalServerError().body(error);
+        }
+    }
+    
+    @GetMapping("/my-uploads")
+    public ResponseEntity<List<Map<String, Object>>> getMyUploads(@AuthenticationPrincipal UserPrincipal userPrincipal) {
+        try {
+            if (userPrincipal == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            }
+            
+            int userId = userPrincipal.getUserId();
+            List<Map<String, Object>> books = bookDAO.getBooksByUploader(userId);
+            return ResponseEntity.ok(books);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().build();
         }
     }
     

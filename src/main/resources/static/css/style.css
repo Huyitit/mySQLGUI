@@ -357,6 +357,16 @@ body {
   background-color: rgba(0, 0, 0, 0.5);
 }
 
+/* Collection books modal - lower z-index */
+#collectionBooksModal {
+  z-index: 2000;
+}
+
+/* Book info modal - higher z-index so it appears on top */
+#bookInfoModal {
+  z-index: 2100;
+}
+
 .modal-content {
   background-color: #fefefe;
   margin: 5% auto;
@@ -588,3 +598,69 @@ body {
   display: flex;
   gap: 0.5rem;
 }
+
+/* Selected items (genre tags) */
+.selected-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.selected-item {
+  display: inline-flex;
+  align-items: center;
+  background: #007bff;
+  color: white;
+  padding: 0.3rem 0.6rem;
+  border-radius: 15px;
+  font-size: 0.85rem;
+}
+
+.remove-item {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.2rem;
+  margin-left: 0.3rem;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+}
+
+.remove-item:hover {
+  color: #ffcccc;
+}
+
+/* Book actions in my-uploads */
+.book-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  flex-wrap: wrap;
+}
+
+.btn-danger {
+  background-color: #dc3545;
+}
+
+.btn-danger:hover {
+  background-color: #c82333;
+}
+
+/* Empty state */
+.empty-state {
+  text-align: center;
+  padding: 3rem 1rem;
+}
+
+.empty-state h3 {
+  color: #666;
+  margin-bottom: 1rem;
+}
+
+.empty-state p {
+  color: #999;
+  margin-bottom: 1.5rem;
+}
+
