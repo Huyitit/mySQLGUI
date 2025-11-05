@@ -164,7 +164,7 @@ public class BookDAO {
     public Map<String, Object> getBookDetails(int bookId) throws SQLException {
         Map<String, Object> details = new HashMap<>();
         
-        String sql = "SELECT b.BookId, b.Name, b.Language, b.Format, b.FilePath, " +
+        String sql = "SELECT b.BookId, b.Name, b.Language, b.Format, b.FilePath, b.UserId AS UploaderId, " +
                      "p.PublisherName, " +
                      "GROUP_CONCAT(DISTINCT a.AuthorName SEPARATOR ', ') AS Authors, " +
                      "GROUP_CONCAT(DISTINCT g.GenreName SEPARATOR ', ') AS Genres " +
@@ -175,7 +175,7 @@ public class BookDAO {
                      "LEFT JOIN GENREBOOK gb ON b.BookId = gb.BookId " +
                      "LEFT JOIN GENRE g ON gb.GenreId = g.GenreId " +
                      "WHERE b.BookId = ? " +
-                     "GROUP BY b.BookId, b.Name, b.Language, b.Format, b.FilePath, p.PublisherName";
+                     "GROUP BY b.BookId, b.Name, b.Language, b.Format, b.FilePath, b.UserId, p.PublisherName";
         
         try (Connection conn = ConnectionManager.getInstance().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -189,6 +189,7 @@ public class BookDAO {
                     details.put("language", rs.getString("Language"));
                     details.put("format", rs.getString("Format"));
                     details.put("filePath", rs.getString("FilePath"));
+                    details.put("uploaderId", rs.getInt("UploaderId"));
                     details.put("publisher", rs.getString("PublisherName"));
                     details.put("authors", rs.getString("Authors"));
                     details.put("genres", rs.getString("Genres"));
@@ -343,6 +344,20 @@ public class BookDAO {
     }
     
     /**
+     * Remove all genres from a book
+     */
+    public void removeGenresFromBook(int bookId) throws SQLException {
+        String sql = "DELETE FROM GENREBOOK WHERE BookId = ?";
+        
+        try (Connection conn = ConnectionManager.getInstance().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setInt(1, bookId);
+            stmt.executeUpdate();
+        }
+    }
+    
+    /**
      * Add an author to a book
      */
     public void addAuthorToBook(int bookId, int authorId) throws SQLException {
@@ -358,10 +373,26 @@ public class BookDAO {
     }
     
     /**
+     * Remove all authors from a book
+     */
+    public void removeAuthorsFromBook(int bookId) throws SQLException {
+        String sql = "DELETE FROM AUTHORBOOK WHERE BookId = ?";
+        
+        try (Connection conn = ConnectionManager.getInstance().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setInt(1, bookId);
+            stmt.executeUpdate();
+        }
+    }
+    
+    /**
      * Get all books uploaded by a specific user
      */
     public List<Map<String, Object>> getBooksByUploader(int userId) throws SQLException {
         List<Map<String, Object>> results = new ArrayList<>();
+        
+        System.out.println("📖 BookDAO.getBooksByUploader: userId=" + userId);
         
         String sql = "SELECT " +
                 "    b.BookId, " +
@@ -370,7 +401,6 @@ public class BookDAO {
                 "    p.PublisherName AS publisher, " +
                 "    GROUP_CONCAT(DISTINCT g.GenreName SEPARATOR ', ') AS genres, " +
                 "    b.Language, " +
-                "    b.PublishedDate AS publishedDate, " +
                 "    b.Format " +
                 "FROM BOOK b " +
                 "LEFT JOIN AUTHORBOOK ab ON b.BookId = ab.BookId " +
@@ -378,14 +408,16 @@ public class BookDAO {
                 "LEFT JOIN PUBLISHER p ON b.PublisherId = p.PublisherId " +
                 "LEFT JOIN GENREBOOK gb ON b.BookId = gb.BookId " +
                 "LEFT JOIN GENRE g ON gb.GenreId = g.GenreId " +
-                "WHERE b.UploaderId = ? " +
-                "GROUP BY b.BookId, b.Name, p.PublisherName, b.Language, b.PublishedDate, b.Format " +
+                "WHERE b.UserId = ? " +
+                "GROUP BY b.BookId, b.Name, p.PublisherName, b.Language, b.Format " +
                 "ORDER BY b.BookId DESC";
         
         try (Connection conn = ConnectionManager.getInstance().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             
             stmt.setInt(1, userId);
+            System.out.println("📖 Executing SQL: " + sql);
+            System.out.println("📖 Parameter: userId=" + userId);
             
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
@@ -396,14 +428,13 @@ public class BookDAO {
                     book.put("publisher", rs.getString("publisher"));
                     book.put("genres", rs.getString("genres"));
                     book.put("language", rs.getString("Language"));
-                    book.put("publishedDate", rs.getDate("publishedDate") != null ? 
-                        rs.getDate("publishedDate").toString() : null);
                     book.put("format", rs.getString("Format"));
                     results.add(book);
                 }
             }
         }
         
+        System.out.println("📖 BookDAO.getBooksByUploader: returning " + results.size() + " books");
         return results;
     }
 }

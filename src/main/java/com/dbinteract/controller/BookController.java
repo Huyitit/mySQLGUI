@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -80,10 +79,16 @@ public class BookController {
     }
     
     @GetMapping("/{id}/details")
-    public ResponseEntity<?> getBookDetails(@PathVariable int id) {
+    public ResponseEntity<?> getBookDetails(
+            @PathVariable int id,
+            @AuthenticationPrincipal UserPrincipal userPrincipal) {
         try {
             Map<String, Object> details = bookDAO.getBookDetails(id);
             if (!details.isEmpty()) {
+                // Add current user's ID to the response so frontend can check permissions
+                if (userPrincipal != null) {
+                    details.put("currentUserId", userPrincipal.getUserId());
+                }
                 return ResponseEntity.ok(details);
             }
             return ResponseEntity.notFound().build();
@@ -268,11 +273,14 @@ public class BookController {
     public ResponseEntity<List<Map<String, Object>>> getMyUploads(@AuthenticationPrincipal UserPrincipal userPrincipal) {
         try {
             if (userPrincipal == null) {
+                System.out.println("❌ My Uploads: User not authenticated");
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
             }
             
             int userId = userPrincipal.getUserId();
+            System.out.println("📚 My Uploads: Loading books for userId=" + userId);
             List<Map<String, Object>> books = bookDAO.getBooksByUploader(userId);
+            System.out.println("📚 My Uploads: Found " + books.size() + " books");
             return ResponseEntity.ok(books);
         } catch (Exception e) {
             e.printStackTrace();
@@ -283,8 +291,20 @@ public class BookController {
     @PutMapping("/{id}")
     public ResponseEntity<?> updateBook(
             @PathVariable int id,
-            @RequestBody Book updatedBook,
+            @RequestParam("title") String title,
+            @RequestParam(value = "author", required = false) String author,
+            @RequestParam(value = "publisher", required = false) String publisher,
+            @RequestParam(value = "language", required = false) String language,
+            @RequestParam(value = "publishedDate", required = false) String publishedDate,
+            @RequestParam(value = "genreIds", required = false) String genreIdsJson,
             @AuthenticationPrincipal UserPrincipal userPrincipal) {
+        
+        System.out.println("=== UPDATE BOOK REQUEST ===");
+        System.out.println("BookId: " + id);
+        System.out.println("Title: " + title);
+        System.out.println("Author: " + author);
+        System.out.println("Publisher: " + publisher);
+        System.out.println("GenreIds: " + genreIdsJson);
         
         try {
             if (userPrincipal == null) {
@@ -310,21 +330,62 @@ public class BookController {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
             }
             
-            // Update book (preserve bookId and userId)
-            updatedBook.setBookId(id);
-            updatedBook.setUserId(userId);
+            // Handle publisher - find or create
+            Integer publisherId = null;
+            if (publisher != null && !publisher.trim().isEmpty()) {
+                Publisher publisherEntity = publisherDAO.findOrCreateByName(publisher.trim());
+                publisherId = publisherEntity.getPublisherId();
+            }
             
-            boolean success = bookDAO.updateBook(updatedBook, userId);
+            // Update book basic info
+            existingBook.setName(title);
+            existingBook.setLanguage(language != null && !language.trim().isEmpty() ? language : "Unknown");
+            existingBook.setPublisherId(publisherId);
             
-            if (success) {
-                Map<String, String> response = new HashMap<>();
-                response.put("message", "Book updated successfully");
-                return ResponseEntity.ok(response);
-            } else {
+            boolean success = bookDAO.updateBook(existingBook, userId);
+            
+            if (!success) {
                 Map<String, String> error = new HashMap<>();
                 error.put("error", "Failed to update book");
                 return ResponseEntity.internalServerError().body(error);
             }
+            
+            // Update author - remove old and add new
+            if (author != null && !author.trim().isEmpty()) {
+                try {
+                    // Remove existing authors
+                    bookDAO.removeAuthorsFromBook(id);
+                    // Add new author
+                    Author authorEntity = authorDAO.findOrCreateByName(author.trim());
+                    bookDAO.addAuthorToBook(id, authorEntity.getAuthorId());
+                } catch (Exception e) {
+                    System.err.println("Failed to update author: " + e.getMessage());
+                }
+            }
+            
+            // Update genres - remove old and add new
+            if (genreIdsJson != null && !genreIdsJson.trim().isEmpty()) {
+                try {
+                    // Parse genre IDs
+                    com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+                    List<Integer> genreIds = mapper.readValue(genreIdsJson, 
+                        mapper.getTypeFactory().constructCollectionType(List.class, Integer.class));
+                    
+                    // Remove existing genres
+                    bookDAO.removeGenresFromBook(id);
+                    // Add new genres
+                    if (!genreIds.isEmpty()) {
+                        bookDAO.addGenresToBook(id, genreIds);
+                    }
+                } catch (Exception e) {
+                    System.err.println("Failed to update genres: " + e.getMessage());
+                    e.printStackTrace();
+                }
+            }
+            
+            Map<String, String> response = new HashMap<>();
+            response.put("message", "Book updated successfully");
+            return ResponseEntity.ok(response);
             
         } catch (Exception e) {
             e.printStackTrace();

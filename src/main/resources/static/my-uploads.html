@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My Uploads - Book Library</title>
+    <link rel="stylesheet" href="/css/style.css" />
+  </head>
+  <body>
+    <nav class="navbar">
+      <div class="nav-brand">📚 Book Library</div>
+      <ul class="nav-menu">
+        <li><a href="/dashboard.html">Dashboard</a></li>
+        <li><a href="/community.html">Community</a></li>
+        <li><a href="/library.html">My Library</a></li>
+        <li><a href="/upload.html">Upload</a></li>
+        <li><a href="/my-uploads.html" class="active">My Uploads</a></li>
+        <li><a href="#" id="logout">Logout</a></li>
+      </ul>
+    </nav>
+
+    <div class="container">
+      <h1>📤 My Uploads</h1>
+      <p style="color: #6b7280; margin-bottom: 2rem;">Books you have uploaded to the library</p>
+
+      <div id="uploadsGrid" class="books-grid"></div>
+
+      <div id="emptyState" class="empty-state" style="display: none;">
+        <div class="empty-state-icon">📚</div>
+        <h3>No Uploads Yet</h3>
+        <p>You haven't uploaded any books yet.</p>
+        <a href="/upload.html" class="btn btn-primary" style="margin-top: 1rem; width: auto;">
+          📤 Upload Your First Book
+        </a>
+      </div>
+    </div>
+
+    <!-- Edit Book Modal -->
+    <div id="editBookModal" class="modal">
+      <div class="modal-content" style="max-width: 700px;">
+        <span class="close" onclick="closeEditModal()">&times;</span>
+        <h2>Edit Book Details</h2>
+        
+        <form id="editBookForm">
+          <input type="hidden" id="editBookId" />
+          
+          <div class="form-group">
+            <label for="editTitle">Book Title *</label>
+            <input type="text" id="editTitle" required />
+          </div>
+
+          <div class="form-group autocomplete-container">
+            <label for="editAuthor">Author</label>
+            <input 
+              type="text" 
+              id="editAuthor" 
+              placeholder="Start typing author name..."
+              autocomplete="off"
+            />
+            <div id="editAuthorSuggestions" class="autocomplete-suggestions"></div>
+          </div>
+
+          <div class="form-group autocomplete-container">
+            <label for="editPublisher">Publisher</label>
+            <input 
+              type="text" 
+              id="editPublisher" 
+              placeholder="Start typing publisher name..."
+              autocomplete="off"
+            />
+            <div id="editPublisherSuggestions" class="autocomplete-suggestions"></div>
+          </div>
+
+          <div class="form-group autocomplete-container">
+            <label for="editGenre">Genres</label>
+            <input 
+              type="text" 
+              id="editGenre" 
+              placeholder="Start typing to search genres..."
+              autocomplete="off"
+            />
+            <div id="editGenreSuggestions" class="autocomplete-suggestions"></div>
+            <div id="editSelectedGenres" class="selected-items"></div>
+          </div>
+
+          <div class="form-group">
+            <label for="editLanguage">Language</label>
+            <input type="text" id="editLanguage" placeholder="e.g., English" />
+          </div>
+
+          <div class="form-group">
+            <label for="editPublishedDate">Published Date</label>
+            <input type="date" id="editPublishedDate" />
+          </div>
+
+          <button type="submit" class="btn btn-primary">
+            💾 Save Changes
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <script src="/js/my-uploads.js"></script>
+    <script src="/js/auth.js"></script>
+    <script>
+      // Load user's uploads when page loads
+      loadMyUploads();
+
+      // Logout functionality
+      document.getElementById("logout")?.addEventListener("click", (e) => {
+        e.preventDefault();
+        localStorage.removeItem("token");
+        localStorage.removeItem("username");
+        window.location.href = "/login.html";
+      });
+    </script>
+  </body>
+</html>

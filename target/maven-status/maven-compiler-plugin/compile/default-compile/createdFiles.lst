@@ -31,6 +31,7 @@ com\dbinteract\models\Publisher.class
 com\dbinteract\dao\UserDAO.class
 com\dbinteract\config\SecurityConfig.class
 com\dbinteract\controller\PublisherController.class
+com\dbinteract\controller\AuthController.class
 com\dbinteract\models\Author.class
 com\dbinteract\dto\LoginRequest.class
 com\dbinteract\security\JwtAuthenticationFilter.class
