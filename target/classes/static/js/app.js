@@ -440,10 +440,6 @@ async function showBookInfo(bookId, isInLibrary) {
     const book = await bookResponse.json();
     console.log("Book details:", book);
     
-    // Check if current user is the uploader
-    const isUploader = book.currentUserId && book.uploaderId && book.currentUserId === book.uploaderId;
-    console.log("Is uploader:", isUploader, "currentUserId:", book.currentUserId, "uploaderId:", book.uploaderId);
-    
     // Fetch rating
     const ratingResponse = await fetch(`${API_URL}/books/${bookId}/rating`, {
       headers: getAuthHeaders(),
@@ -507,24 +503,7 @@ async function showBookInfo(bookId, isInLibrary) {
       </div>
     `;
     
-    // If current user is the uploader, show edit button
-    if (isUploader) {
-      content += `
-        <div class="book-detail-item" style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 2px solid #e5e7eb;">
-          <label>Book Management:</label>
-          <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
-            <button onclick="window.location.href='/my-uploads.html'" class="btn btn-small" style="background: #6366f1;">
-              ✏️ Edit Book Details
-            </button>
-          </div>
-          <p style="color: #6b7280; font-size: 0.875rem; margin-top: 0.5rem;">
-            You uploaded this book. Visit My Uploads to edit details.
-          </p>
-        </div>
-      `;
-    }
-    
-    // If book is in user's library, show editable fields (for rating and progress only)
+    // If book is in user's library, show editable fields
     if (isInLibrary && userBook) {
       content += `
         <div class="edit-section">
