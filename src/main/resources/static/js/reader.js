@@ -4,7 +4,12 @@ let currentBookId;
 let currentPage = 1;
 let totalPages = 1;
 let pdfDoc = null;
+let epubBook = null;
+let epubRendition = null;
+let currentFormat = null;
 let userRating = 0;
+let isRestoringProgress = false;
+let saveProgressTimeout = null;
 
 // Get book ID from URL
 const urlParams = new URLSearchParams(window.location.search);
@@ -26,11 +31,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   window.addEventListener('beforeunload', async (e) => {
     await saveReadingProgress();
   });
-  
-  // Also save progress periodically (every 30 seconds)
-  setInterval(() => {
-    saveReadingProgress();
-  }, 30000);
 });
 
 // Load book details and file
@@ -47,6 +47,7 @@ async function loadBook() {
 
     const book = await response.json();
     document.getElementById("bookTitle").textContent = book.name;
+    currentFormat = book.format;
 
     // Load book file based on format
     if (book.format === "PDF") {
@@ -127,63 +128,183 @@ async function renderPage(pageNum) {
 
 // Update page info display
 function updatePageInfo() {
-  document.getElementById("pageInfo").textContent = `Page ${currentPage} of ${totalPages}`;
+  const pageInfo = document.getElementById("pageInfo");
+  if (currentFormat === "PDF") {
+    pageInfo.textContent = `Page ${currentPage} of ${totalPages}`;
+  } else if (currentFormat === "EPUB") {
+    if (totalPages > 0) {
+      const percentage = Math.round((currentPage / totalPages) * 100);
+      pageInfo.textContent = `${percentage}% (Location ${currentPage} of ${totalPages})`;
+    } else {
+      pageInfo.textContent = `Reading...`;
+    }
+  }
 }
 
 // Load EPUB
 async function loadEPUB(bookId) {
   const epubViewer = document.getElementById("epubViewer");
+  const pdfViewer = document.getElementById("pdfViewer");
+  
   epubViewer.style.display = "block";
+  pdfViewer.style.display = "none";
 
   const url = `${API_URL}/books/read/${bookId}`;
 
   try {
-    const book = ePub(url, {
-      requestHeaders: {
+    console.log("Loading EPUB from:", url);
+    console.log("ePub library available:", typeof ePub !== 'undefined');
+    
+    // Check if ePub library is available
+    if (typeof ePub === 'undefined') {
+      console.error("ePub library not loaded!");
+      alert("EPUB reader library not available. Please refresh the page.");
+      return;
+    }
+    
+    // Fetch the EPUB file as ArrayBuffer
+    console.log("Fetching EPUB file...");
+    const response = await fetch(url, {
+      headers: {
         Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
-    });
-
-    const rendition = book.renderTo("epubViewer", {
-      width: "100%",
-      height: "100%",
-      spread: "none",
-    });
-
-    await rendition.display();
-
-    // Update total pages estimation (EPUB doesn't have fixed pages)
-    totalPages = 0; // EPUB uses locations instead of pages
-    updatePageInfo();
-
-    // Handle navigation
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "ArrowLeft") {
-        rendition.prev();
-      } else if (e.key === "ArrowRight") {
-        rendition.next();
       }
     });
+    
+    if (!response.ok) {
+      throw new Error(`Failed to fetch EPUB: ${response.status} ${response.statusText}`);
+    }
+    
+    const arrayBuffer = await response.arrayBuffer();
+    console.log("EPUB file loaded, size:", arrayBuffer.byteLength, "bytes");
+    
+    // Create the book from ArrayBuffer
+    epubBook = ePub(arrayBuffer);
+    console.log("EPUB book created");
+
+    // Render to viewer with full available height
+    const viewerElement = document.getElementById("epubViewer");
+    const viewerHeight = viewerElement.offsetHeight || window.innerHeight - 100;
+    
+    epubRendition = epubBook.renderTo("epubViewer", {
+      width: "100%",
+      height: viewerHeight,
+      allowScriptedContent: true,
+      flow: "scrolled-doc"  // Continuous scroll instead of paginated
+    });
+    
+    console.log("EPUB rendition created with height:", viewerHeight);
+
+    // Display the book
+    await epubRendition.display();
+    console.log("EPUB displayed successfully");
+
+    // Wait for book to be ready
+    await epubBook.ready;
+    console.log("EPUB book ready");
+    
+    // Mark that we're initializing to prevent relocated events
+    isRestoringProgress = true;
+    
+    // Generate locations (this might take a while)
+    console.log("Generating EPUB locations...");
+    await epubBook.locations.generate(1024);
+    console.log("EPUB locations generated:", epubBook.locations.total);
+    
+    totalPages = epubBook.locations.total;
+    
+    // Load saved progress
+    const savedPage = await loadSavedProgress();
+    
+    if (savedPage > 0 && totalPages > 0) {
+      const percentage = savedPage / totalPages;
+      const cfi = epubBook.locations.cfiFromPercentage(percentage);
+      currentPage = savedPage;
+      console.log("Restoring to location:", savedPage, "of", totalPages, `(${Math.round(percentage * 100)}%)`);
+      await epubRendition.display(cfi);
+    } else {
+      currentPage = 1;
+      console.log("Starting from beginning");
+    }
+    
+    updatePageInfo();
+    
+    // NOW set up the relocated event listener (after all initialization is done)
+    epubRendition.on("relocated", (location) => {
+      if (isRestoringProgress) {
+        // Skip updates while restoring progress
+        console.log("Skipping relocated event during initialization");
+        return;
+      }
+      
+      if (epubBook.locations && epubBook.locations.total > 0) {
+        const percentage = epubBook.locations.percentageFromCfi(location.start.cfi);
+        const newPage = Math.round(percentage * epubBook.locations.total);
+        
+        // Only update if the page actually changed significantly
+        if (Math.abs(newPage - currentPage) > 0) {
+          currentPage = Math.max(1, newPage);
+          console.log("Navigated to location:", currentPage, "of", totalPages, `(${Math.round(percentage * 100)}%)`);
+          updatePageInfo();
+          
+          // Debounce progress saving
+          if (saveProgressTimeout) {
+            clearTimeout(saveProgressTimeout);
+          }
+          saveProgressTimeout = setTimeout(() => {
+            saveReadingProgress();
+          }, 1000); // Save 1 second after user stops navigating
+        }
+      }
+    });
+    
+    // Wait a bit for everything to settle, then enable tracking
+    setTimeout(() => {
+      isRestoringProgress = false;
+      console.log("EPUB initialization complete, tracking enabled");
+    }, 1000);
+
+    // Handle keyboard navigation
+    document.addEventListener("keydown", handleEpubKeyboard);
+    
+    console.log("EPUB loading complete");
+    
   } catch (error) {
     console.error("Error loading EPUB:", error);
-    alert("Failed to load EPUB file");
+    console.error("Error stack:", error.stack);
+    alert("Failed to load EPUB file: " + error.message + "\nCheck console for details.");
+  }
+}
+
+function handleEpubKeyboard(e) {
+  if (currentFormat === "EPUB" && epubRendition) {
+    if (e.key === "ArrowLeft") {
+      epubRendition.prev();
+    } else if (e.key === "ArrowRight") {
+      epubRendition.next();
+    }
   }
 }
 
 // Navigation
 function previousPage() {
-  if (currentPage > 1) {
-    renderPage(currentPage - 1);
-    // Save progress after page change
-    saveReadingProgress();
+  if (currentFormat === "PDF") {
+    if (currentPage > 1) {
+      renderPage(currentPage - 1);
+      saveReadingProgress();
+    }
+  } else if (currentFormat === "EPUB" && epubRendition) {
+    epubRendition.prev();
   }
 }
 
 function nextPage() {
-  if (currentPage < totalPages) {
-    renderPage(currentPage + 1);
-    // Save progress after page change
-    saveReadingProgress();
+  if (currentFormat === "PDF") {
+    if (currentPage < totalPages) {
+      renderPage(currentPage + 1);
+      saveReadingProgress();
+    }
+  } else if (currentFormat === "EPUB" && epubRendition) {
+    epubRendition.next();
   }
 }
 
@@ -257,8 +378,21 @@ async function addBookmark() {
   const name = prompt("Bookmark name:");
   if (!name) return;
 
+  let location = "";
+  
+  if (currentFormat === "PDF") {
+    location = `Page ${currentPage}`;
+  } else if (currentFormat === "EPUB" && epubRendition) {
+    const currentLocation = epubRendition.currentLocation();
+    if (currentLocation && currentLocation.start) {
+      location = currentLocation.start.cfi;
+    } else {
+      location = `Location ${currentPage}`;
+    }
+  }
+
   try {
-    await fetch(`${API_URL}/bookmarks`, {
+    const response = await fetch(`${API_URL}/bookmarks`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -266,12 +400,17 @@ async function addBookmark() {
       },
       body: JSON.stringify({
         bookmarkName: name,
-        location: `Page ${currentPage}`,
+        location: location,
         bookId: currentBookId,
       }),
     });
 
-    await loadBookmarks();
+    if (response.ok) {
+      await loadBookmarks();
+      alert("Bookmark added successfully!");
+    } else {
+      alert("Failed to add bookmark");
+    }
   } catch (error) {
     console.error("Error adding bookmark:", error);
     alert("Failed to add bookmark");
@@ -279,12 +418,30 @@ async function addBookmark() {
 }
 
 function goToBookmark(location) {
-  // Parse location and navigate
-  const pageMatch = location.match(/Page (\d+)/);
-  if (pageMatch) {
-    currentPage = parseInt(pageMatch[1]);
-    renderPage(currentPage);
+  if (currentFormat === "PDF") {
+    // Parse location and navigate for PDF
+    const pageMatch = location.match(/Page (\d+)/);
+    if (pageMatch) {
+      const page = parseInt(pageMatch[1]);
+      renderPage(page);
+    }
+  } else if (currentFormat === "EPUB" && epubRendition) {
+    // For EPUB, check if it's a CFI or location number
+    if (location.startsWith("epubcfi")) {
+      epubRendition.display(location);
+    } else {
+      const locationMatch = location.match(/Location (\d+)/);
+      if (locationMatch) {
+        const loc = parseInt(locationMatch[1]);
+        const percentage = loc / totalPages;
+        const cfi = epubBook.locations.cfiFromPercentage(percentage);
+        epubRendition.display(cfi);
+      }
+    }
   }
+  
+  // Close bookmark panel after navigation
+  toggleBookmarks();
 }
 
 function goBack() {
@@ -482,7 +639,17 @@ async function saveReadingProgress() {
   
   try {
     // Calculate progress percentage
-    const progressPercentage = Math.round((currentPage / totalPages) * 100);
+    let progressPercentage;
+    
+    if (currentFormat === "PDF") {
+      progressPercentage = Math.round((currentPage / totalPages) * 100);
+    } else if (currentFormat === "EPUB") {
+      // For EPUB, currentPage is already calculated from location percentage
+      progressPercentage = Math.round((currentPage / totalPages) * 100);
+    } else {
+      return; // Unknown format
+    }
+    
     const progress = `${progressPercentage}%`;
     
     console.log(`Auto-saving progress: Page ${currentPage}/${totalPages} = ${progress}`);

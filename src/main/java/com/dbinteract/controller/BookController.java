@@ -171,8 +171,17 @@ public class BookController {
             Path uploadPath = Paths.get(fileStorageService.getUploadDir()).toAbsolutePath().normalize();
             String filePath = uploadPath.resolve(storedFilename).toString();
             
-            // Determine format
-            String format = extension.equalsIgnoreCase("pdf") ? "PDF" : "EPUB";
+            // Determine format based on extension
+            String format;
+            if (extension.equalsIgnoreCase("pdf")) {
+                format = "PDF";
+            } else if (extension.equalsIgnoreCase("epub")) {
+                format = "EPUB";
+            } else if (extension.equalsIgnoreCase("mobi") || extension.equalsIgnoreCase("azw") || extension.equalsIgnoreCase("azw3")) {
+                format = "MOBI";
+            } else {
+                format = "EPUB"; // Default to EPUB for other ebook formats
+            }
             
             // Create new book
             Book newBook = new Book();
