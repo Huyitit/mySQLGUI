@@ -4,6 +4,24 @@ console.log("Upload.js loaded!");
 console.log("Genre input element:", document.getElementById("genres"));
 console.log("Genre suggestions element:", document.getElementById("genreSuggestions"));
 
+// Setup user dropdown toggle
+const userInfoToggle = document.getElementById("userInfoToggle");
+const userDropdown = document.getElementById("userDropdown");
+
+if (userInfoToggle && userDropdown) {
+  userInfoToggle.addEventListener("click", (e) => {
+    e.stopPropagation();
+    userDropdown.classList.toggle("show");
+  });
+
+  // Close dropdown when clicking outside
+  document.addEventListener("click", (e) => {
+    if (!userDropdown.contains(e.target) && e.target !== userInfoToggle) {
+      userDropdown.classList.remove("show");
+    }
+  });
+}
+
 // Author autocomplete
 const authorInput = document.getElementById("author");
 const authorSuggestions = document.getElementById("authorSuggestions");
@@ -136,44 +154,115 @@ const genreSuggestions = document.getElementById("genreSuggestions");
 const selectedGenresDiv = document.getElementById("selectedGenres");
 let selectedGenres = [];
 let genreDebounceTimer;
+let allGenres = []; // Cache all genres
+
+// Delete account button (if present on the page)
+const deleteAccountBtn = document.getElementById('deleteAccount');
+if (deleteAccountBtn) {
+  deleteAccountBtn.addEventListener('click', async () => {
+    const confirmed = confirm('Are you sure you want to permanently delete your account? This cannot be undone.');
+    if (!confirmed) return;
+
+    try {
+      const resp = await fetch(`${API_URL}/users/me`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (resp.status === 204) {
+        // cleared
+        alert('Your account has been deleted. You will be logged out.');
+        localStorage.removeItem('token');
+        window.location.href = '/index.html';
+      } else if (resp.status === 401 || resp.status === 403) {
+        alert('You must be logged in to delete your account.');
+      } else {
+        const text = await resp.text();
+        console.error('Delete failed', resp.status, text);
+        alert('Failed to delete account. Try again later.');
+      }
+    } catch (err) {
+      console.error('Error deleting account:', err);
+      alert('Error deleting account. Check console for details.');
+    }
+  });
+}
+
+// Fetch all genres on page load
+async function loadAllGenres() {
+  try {
+    console.log("Loading all genres...");
+    console.log("Token:", localStorage.getItem("token") ? "exists" : "missing");
+    
+    // Use the /api/genres endpoint to get ALL genres
+    const response = await fetch(`${API_URL}/genres`, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+    });
+    
+    console.log("Response status:", response.status);
+    
+    if (response.ok) {
+      allGenres = await response.json();
+      console.log("All genres loaded:", allGenres.length, "genres");
+      console.log("First few genres:", allGenres.slice(0, 5));
+    } else {
+      console.error("Failed to load genres. Status:", response.status);
+      if (response.status === 401 || response.status === 403) {
+        console.error("Authentication required. Please login first.");
+      }
+    }
+  } catch (error) {
+    console.error("Error loading genres:", error);
+  }
+}
+
+// Load genres when page loads
+loadAllGenres();
 
 if (genreInput) {
   console.log("Genre input found, adding event listener");
+  
+  // Show all genres on focus
+  genreInput.addEventListener("focus", () => {
+    console.log("Genre input focused");
+    if (allGenres.length > 0) {
+      displayGenreSuggestions(allGenres);
+    } else {
+      // Load genres if not already loaded
+      loadAllGenres().then(() => {
+        displayGenreSuggestions(allGenres);
+      });
+    }
+  });
+  
+  // Filter genres as user types
   genreInput.addEventListener("input", (e) => {
     console.log("Genre input event fired, value:", e.target.value);
     clearTimeout(genreDebounceTimer);
-    const query = e.target.value.trim();
+    const query = e.target.value.trim().toLowerCase();
     
-    if (query.length < 1) {
-      genreSuggestions.classList.remove("show");
+    // If empty, show all genres
+    if (query.length === 0) {
+      displayGenreSuggestions(allGenres);
       return;
     }
     
-    genreDebounceTimer = setTimeout(async () => {
-      try {
-        console.log("Fetching genres for query:", query);
-        const response = await fetch(`${API_URL}/genres/search?q=${encodeURIComponent(query)}`, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        });
-        
-        if (response.ok) {
-          const genres = await response.json();
-          console.log("Genres received from API:", genres);
-          displayGenreSuggestions(genres);
-        } else {
-          console.log("Genre API response not OK:", response.status);
-        }
-      } catch (error) {
-        console.error("Error fetching genres:", error);
-      }
-    }, 300);
+    // Filter genres locally
+    const filteredGenres = allGenres.filter(genre => 
+      genre.genreName.toLowerCase().includes(query)
+    );
+    
+    displayGenreSuggestions(filteredGenres);
   });
   
   // Close suggestions when clicking outside
   document.addEventListener("click", (e) => {
-    if (e.target !== genreInput && e.target !== genreSuggestions) {
+    if (e.target !== genreInput && !genreSuggestions.contains(e.target)) {
       genreSuggestions.classList.remove("show");
     }
   });
@@ -189,28 +278,31 @@ function displayGenreSuggestions(genres) {
   console.log("Available genres after filtering:", availableGenres);
   
   if (availableGenres.length === 0) {
-    genreSuggestions.classList.remove("show");
-    console.log("No available genres, hiding suggestions");
+    genreSuggestions.innerHTML = '<div class="no-genres" style="padding: var(--space-4); color: var(--text-muted); text-align: center;">No more genres available</div>';
+    genreSuggestions.classList.add("show");
+    console.log("No available genres");
     return;
   }
   
-  genreSuggestions.innerHTML = availableGenres
-    .map(genre => `
-      <div class="suggestion-item" data-genre-id="${genre.genreId}" data-genre-name="${genre.genreName}">
-        ${genre.genreName}
-      </div>
-    `)
-    .join('');
+  // Display genres as tags/chips in a grid
+  genreSuggestions.innerHTML = `
+    <div class="genre-tags-container">
+      ${availableGenres.map(genre => `
+        <div class="genre-tag" data-genre-id="${genre.genreId}" data-genre-name="${genre.genreName}">
+          ${genre.genreName}
+        </div>
+      `).join('')}
+    </div>
+  `;
   
   console.log("Genre suggestions HTML created, adding event listeners");
   
-  // Add click event listeners to each suggestion
-  genreSuggestions.querySelectorAll('.suggestion-item').forEach(item => {
+  // Add click event listeners to each genre tag
+  genreSuggestions.querySelectorAll('.genre-tag').forEach(item => {
     item.addEventListener('click', () => {
       const genreId = parseInt(item.dataset.genreId);
       const genreName = item.dataset.genreName;
       console.log("Genre clicked:", genreId, genreName);
-      alert(`Genre clicked: ${genreName} (ID: ${genreId})`); // TEMPORARY DEBUG
       selectGenre(genreId, genreName);
     });
   });

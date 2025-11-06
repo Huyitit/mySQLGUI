@@ -27,6 +27,7 @@ E:\Java\mySQLGUI\src\main\java\com\dbinteract\dao\GenreDAO.java
 E:\Java\mySQLGUI\src\main\java\com\dbinteract\dto\LoginRequest.java
 E:\Java\mySQLGUI\src\main\java\com\dbinteract\security\UserDetailsServiceImpl.java
 E:\Java\mySQLGUI\src\main\java\com\dbinteract\config\FileStorageConfig.java
+E:\Java\mySQLGUI\src\main\java\com\dbinteract\controller\UserController.java
 E:\Java\mySQLGUI\src\main\java\com\dbinteract\models\Publisher.java
 E:\Java\mySQLGUI\src\main\java\com\dbinteract\service\AuthService.java
 E:\Java\mySQLGUI\src\main\java\com\dbinteract\models\User.java

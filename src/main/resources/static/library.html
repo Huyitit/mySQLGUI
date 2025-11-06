@@ -8,31 +8,51 @@
   </head>
   <body>
     <nav class="navbar">
-      <div class="nav-brand">📚 Book Library</div>
-      <ul class="nav-menu">
-        <li><a href="/dashboard.html">Dashboard</a></li>
-        <li><a href="/community.html">Community</a></li>
-        <li><a href="/library.html" class="active">My Library</a></li>
-        <li><a href="/upload.html">Upload</a></li>
-        <li><a href="#" id="logout">Logout</a></li>
-      </ul>
+      <div class="nav-container">
+        <a href="/dashboard.html" class="nav-brand">📚 Book Library</a>
+        <ul class="nav-menu">
+          <li><a href="/dashboard.html" class="nav-link">🏠 Dashboard</a></li>
+          <li><a href="/community.html" class="nav-link">🌍 Community</a></li>
+          <li><a href="/library.html" class="nav-link active">📖 My Library</a></li>
+          <li><a href="/upload.html" class="nav-link">📤 Upload</a></li>
+        </ul>
+        <div class="user-menu">
+          <div class="user-info" id="userInfoToggle">
+            <div class="user-avatar"><span id="userInitial">U</span></div>
+            <span class="user-name" id="username"></span>
+          </div>
+          <div class="user-dropdown" id="userDropdown">
+            <div class="user-dropdown-item" id="logout">
+              <span>🚪</span>
+              <span>Logout</span>
+            </div>
+            <div class="user-dropdown-item danger" id="deleteAccount">
+              <span>🗑️</span>
+              <span>Delete Account</span>
+            </div>
+          </div>
+        </div>
+      </div>
     </nav>
 
-    <div class="container">
-      <h1>📚 My Library</h1>
+    <div class="main-container">
+      <div class="page-header">
+        <h1 class="page-title">My Library 📚</h1>
+        <p class="page-subtitle">Manage and organize your personal book collection</p>
+      </div>
 
       <div class="tabs">
         <button class="tab-btn active" onclick="filterLibrary('all')">
-          All Books
+          📚 All Books
         </button>
         <button class="tab-btn" onclick="filterLibrary('reading')">
-          Reading
+          📖 Reading
         </button>
         <button class="tab-btn" onclick="filterLibrary('completed')">
-          Completed
+          ✅ Completed
         </button>
         <button class="tab-btn" onclick="filterLibrary('not-started')">
-          Not Started
+          📌 Not Started
         </button>
       </div>
 

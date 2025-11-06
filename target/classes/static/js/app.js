@@ -11,6 +11,24 @@ document.addEventListener("DOMContentLoaded", () => {
     checkAuth();
   }
 
+  // Setup user dropdown toggle
+  const userInfoToggle = document.getElementById("userInfoToggle");
+  const userDropdown = document.getElementById("userDropdown");
+  
+  if (userInfoToggle && userDropdown) {
+    userInfoToggle.addEventListener("click", (e) => {
+      e.stopPropagation();
+      userDropdown.classList.toggle("show");
+    });
+
+    // Close dropdown when clicking outside
+    document.addEventListener("click", (e) => {
+      if (!userDropdown.contains(e.target) && e.target !== userInfoToggle) {
+        userDropdown.classList.remove("show");
+      }
+    });
+  }
+
   // Setup logout button
   const logoutBtn = document.getElementById("logout");
   if (logoutBtn) {
@@ -18,6 +36,41 @@ document.addEventListener("DOMContentLoaded", () => {
       e.preventDefault();
       localStorage.clear();
       window.location.href = "/login.html";
+    });
+  }
+
+  // Setup delete account button
+  const deleteAccountBtn = document.getElementById("deleteAccount");
+  if (deleteAccountBtn) {
+    deleteAccountBtn.addEventListener("click", async (e) => {
+      e.preventDefault();
+      
+      const confirmed = confirm(
+        "Are you sure you want to delete your account? This action cannot be undone and will delete all your data including books, collections, and reading progress."
+      );
+      
+      if (!confirmed) return;
+      
+      try {
+        const response = await fetch(`${API_URL}/users/me`, {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        });
+        
+        if (response.ok) {
+          alert("Your account has been successfully deleted.");
+          localStorage.clear();
+          window.location.href = "/login.html";
+        } else {
+          const error = await response.text();
+          alert("Failed to delete account: " + error);
+        }
+      } catch (error) {
+        console.error("Error deleting account:", error);
+        alert("An error occurred while deleting your account.");
+      }
     });
   }
 });
@@ -539,7 +592,11 @@ async function showBookInfo(bookId, isInLibrary) {
     }
     
     document.getElementById('bookInfoContent').innerHTML = content;
-    document.getElementById('bookInfoModal').style.display = 'block';
+    
+    // Show modal with proper centering
+    const modal = document.getElementById('bookInfoModal');
+    modal.classList.remove('hidden');
+    modal.style.display = 'flex';
     
   } catch (error) {
     console.error("Error loading book info:", error);
@@ -548,14 +605,22 @@ async function showBookInfo(bookId, isInLibrary) {
 }
 
 function closeBookInfo() {
-  document.getElementById('bookInfoModal').style.display = 'none';
+  const modal = document.getElementById('bookInfoModal');
+  modal.classList.add('hidden');
+  modal.style.display = 'none';
 }
 
 // Close modal when clicking outside
 window.onclick = function(event) {
   const modal = document.getElementById('bookInfoModal');
+  const collectionModal = document.getElementById('collectionBooksModal');
+  
   if (event.target === modal) {
-    modal.style.display = 'none';
+    closeBookInfo();
+  }
+  
+  if (collectionModal && event.target === collectionModal) {
+    closeCollectionBooksModal();
   }
 }
 
@@ -822,8 +887,10 @@ async function viewCollection(collectionId, collectionName) {
         `).join('');
       }
       
-      // Show modal
-      document.getElementById('collectionBooksModal').style.display = 'block';
+      // Show modal with proper centering
+      const modal = document.getElementById('collectionBooksModal');
+      modal.classList.remove('hidden');
+      modal.style.display = 'flex';
     } else {
       const errorText = await response.text();
       console.error("Error response:", errorText);
@@ -836,7 +903,9 @@ async function viewCollection(collectionId, collectionName) {
 }
 
 function closeCollectionBooksModal() {
-  document.getElementById('collectionBooksModal').style.display = 'none';
+  const modal = document.getElementById('collectionBooksModal');
+  modal.classList.add('hidden');
+  modal.style.display = 'none';
 }
 
 async function addBookToCollection(bookId) {
@@ -894,16 +963,3 @@ async function addBookToCollection(bookId) {
     alert('Failed to add book to collection');
   }
 }
-
-// Close modal when clicking outside
-window.onclick = function(event) {
-  const collectionModal = document.getElementById('collectionBooksModal');
-  const bookInfoModal = document.getElementById('bookInfoModal');
-  
-  if (event.target === collectionModal) {
-    collectionModal.style.display = 'none';
-  }
-  if (event.target === bookInfoModal) {
-    bookInfoModal.style.display = 'none';
-  }
-};

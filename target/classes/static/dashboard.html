@@ -8,72 +8,116 @@
   </head>
   <body>
     <nav class="navbar">
-      <div class="nav-brand">📚 Book Library</div>
-      <ul class="nav-menu">
-        <li><a href="/dashboard.html" class="active">Dashboard</a></li>
-        <li><a href="/community.html">Community</a></li>
-        <li><a href="/library.html">My Library</a></li>
-        <li><a href="/upload.html">Upload</a></li>
-        <li><a href="#" id="logout">Logout</a></li>
-      </ul>
+      <div class="nav-container">
+        <a href="/dashboard.html" class="nav-brand">📚 Book Library</a>
+        <ul class="nav-menu">
+          <li><a href="/dashboard.html" class="nav-link active">🏠 Dashboard</a></li>
+          <li><a href="/community.html" class="nav-link">🌍 Community</a></li>
+          <li><a href="/library.html" class="nav-link">📖 My Library</a></li>
+          <li><a href="/upload.html" class="nav-link">📤 Upload</a></li>
+        </ul>
+        <div class="user-menu">
+          <div class="user-info" id="userInfoToggle">
+            <div class="user-avatar"><span id="userInitial">U</span></div>
+            <span class="user-name" id="username"></span>
+          </div>
+          <div class="user-dropdown" id="userDropdown">
+            <div class="user-dropdown-item" id="logout">
+              <span>🚪</span>
+              <span>Logout</span>
+            </div>
+            <div class="user-dropdown-item danger" id="deleteAccount">
+              <span>🗑️</span>
+              <span>Delete Account</span>
+            </div>
+          </div>
+        </div>
+      </div>
     </nav>
 
-    <div class="container">
-      <h1>Welcome, <span id="username"></span>!</h1>
+    <div class="main-container">
+      <div class="page-header">
+        <h1 class="page-title">Welcome Back! 👋</h1>
+        <p class="page-subtitle">Here's your reading overview and recent activity</p>
+      </div>
 
       <div class="stats-grid">
         <div class="stat-card">
-          <h3>📖 Total Books</h3>
-          <p id="totalBooks" class="stat-number">0</p>
+          <div class="stat-icon primary">📚</div>
+          <div class="stat-content">
+            <div class="stat-label">Total Books</div>
+            <div class="stat-value" id="totalBooks">0</div>
+          </div>
         </div>
         <div class="stat-card">
-          <h3>📚 Reading</h3>
-          <p id="readingBooks" class="stat-number">0</p>
+          <div class="stat-icon warning">📖</div>
+          <div class="stat-content">
+            <div class="stat-label">Currently Reading</div>
+            <div class="stat-value" id="readingBooks">0</div>
+          </div>
         </div>
         <div class="stat-card">
-          <h3>✅ Completed</h3>
-          <p id="completedBooks" class="stat-number">0</p>
+          <div class="stat-icon success">✅</div>
+          <div class="stat-content">
+            <div class="stat-label">Completed</div>
+            <div class="stat-value" id="completedBooks">0</div>
+          </div>
         </div>
         <div class="stat-card">
-          <h3>🏷️ Collections</h3>
-          <p id="totalCollections" class="stat-number">0</p>
+          <div class="stat-icon accent">📂</div>
+          <div class="stat-content">
+            <div class="stat-label">Collections</div>
+            <div class="stat-value" id="totalCollections">0</div>
+          </div>
         </div>
       </div>
 
       <div class="section">
-        <h2>Recently Added</h2>
+        <div class="section-header">
+          <h2 class="section-title">Recently Added Books</h2>
+        </div>
         <div id="recentBooks" class="books-grid"></div>
       </div>
 
       <div class="section">
-        <h2>Continue Reading</h2>
+        <div class="section-header">
+          <h2 class="section-title">Continue Reading</h2>
+        </div>
         <div id="continueReading" class="books-grid"></div>
       </div>
 
       <div class="section">
-        <h2>My Collections</h2>
-        <button onclick="createCollection()" class="btn" style="margin-bottom: 1rem;">
-          + New Collection
-        </button>
+        <div class="section-header">
+          <h2 class="section-title">My Collections</h2>
+          <button onclick="createCollection()" class="btn btn-primary">
+            ➕ New Collection
+          </button>
+        </div>
         <div id="collectionsGrid" class="collections-grid"></div>
       </div>
     </div>
 
     <!-- Book Info Modal -->
-    <div id="bookInfoModal" class="modal">
-      <div class="modal-content">
-        <span class="close" onclick="closeBookInfo()">&times;</span>
-        <h2 id="modalBookTitle">Book Information</h2>
-        <div id="bookInfoContent"></div>
+    <div id="bookInfoModal" class="modal-overlay hidden">
+      <div class="modal-container">
+        <div class="modal-header">
+          <h2 class="modal-title" id="modalBookTitle">Book Information</h2>
+          <button class="modal-close" onclick="closeBookInfo()">&times;</button>
+        </div>
+        <div class="modal-body" id="bookInfoContent"></div>
       </div>
     </div>
 
     <!-- Collection Books Modal -->
-    <div id="collectionBooksModal" class="modal">
-      <div class="modal-content" style="max-width: 800px;">
-        <span class="close" onclick="closeCollectionBooksModal()">&times;</span>
-        <h2 id="collectionModalTitle">Collection Books</h2>
-        <div id="collectionBooksContent" class="books-grid"></div>
+    <div id="collectionBooksModal" class="modal-overlay hidden">
+      <div class="modal-container">
+        <div class="modal-header">
+          <h2 class="modal-title" id="collectionModalTitle">Collection Books</h2>
+          <button class="modal-close" onclick="closeCollectionBooksModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div id="collectionBooksContent" class="books-grid"></div>
+        </div>
       </div>
     </div>
 

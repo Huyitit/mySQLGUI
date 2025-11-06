@@ -8,24 +8,43 @@
   </head>
   <body>
     <nav class="navbar">
-      <div class="nav-brand">📚 Book Library</div>
-      <ul class="nav-menu">
-        <li><a href="/dashboard.html">Dashboard</a></li>
-        <li><a href="/community.html">Community</a></li>
-        <li><a href="/library.html">My Library</a></li>
-        <li><a href="/upload.html" class="active">Upload</a></li>
-        <li><a href="/my-uploads.html">My Uploads</a></li>
-        <li><a href="#" id="logout">Logout</a></li>
-      </ul>
+      <div class="nav-container">
+        <a href="/dashboard.html" class="nav-brand">📚 Book Library</a>
+        <ul class="nav-menu">
+          <li><a href="/dashboard.html" class="nav-link">🏠 Dashboard</a></li>
+          <li><a href="/community.html" class="nav-link">🌍 Community</a></li>
+          <li><a href="/library.html" class="nav-link">📖 My Library</a></li>
+          <li><a href="/upload.html" class="nav-link active">📤 Upload</a></li>
+        </ul>
+        <div class="user-menu">
+          <div class="user-info" id="userInfoToggle">
+            <div class="user-avatar"><span id="userInitial">U</span></div>
+            <span class="user-name" id="username"></span>
+          </div>
+          <div class="user-dropdown" id="userDropdown">
+            <div class="user-dropdown-item" id="logout">
+              <span>🚪</span>
+              <span>Logout</span>
+            </div>
+            <div class="user-dropdown-item danger" id="deleteAccount">
+              <span>🗑️</span>
+              <span>Delete Account</span>
+            </div>
+          </div>
+        </div>
+      </div>
     </nav>
 
-    <div class="container">
-      <h1>📤 Upload New Book</h1>
+    <div class="main-container">
+      <div class="page-header">
+        <h1 class="page-title">Upload New Book 📤</h1>
+        <p class="page-subtitle">Share your favorite ebooks with the community</p>
+      </div>
 
       <div class="upload-card">
         <form id="uploadForm" enctype="multipart/form-data">
           <div class="form-group">
-            <label for="ebookContent">Book File</label>
+            <label for="ebookContent">📁 Book File *</label>
             <input
               type="file"
               id="ebookContent"
@@ -33,37 +52,35 @@
               accept=".pdf,.epub"
               required
             />
-            <small
-              >Supported formats: PDF, EPUB (Max: 50MB)</small
-            >
+            <small>Supported formats: PDF, EPUB (Maximum file size: 50MB)</small>
           </div>
 
           <div class="form-group">
-            <label for="title">Book Title</label>
-            <input type="text" id="title" name="title" required />
+            <label for="title">📖 Book Title *</label>
+            <input type="text" id="title" name="title" placeholder="Enter book title" required />
           </div>
 
           <div class="form-group">
-            <label for="author">Author (Optional)</label>
-            <input type="text" id="author" name="author" autocomplete="off" />
+            <label for="author">✍️ Author (Optional)</label>
+            <input type="text" id="author" name="author" placeholder="Enter author name" autocomplete="off" />
             <div id="authorSuggestions" class="autocomplete-suggestions"></div>
           </div>
 
           <div class="form-group">
-            <label for="publisher">Publisher (Optional)</label>
-            <input type="text" id="publisher" name="publisher" autocomplete="off" />
+            <label for="publisher">🏢 Publisher (Optional)</label>
+            <input type="text" id="publisher" name="publisher" placeholder="Enter publisher name" autocomplete="off" />
             <div id="publisherSuggestions" class="autocomplete-suggestions"></div>
           </div>
 
           <div class="form-group">
-            <label for="genres">Genres (Optional)</label>
+            <label for="genres">🏷️ Genres (Optional)</label>
             <input type="text" id="genres" placeholder="Type to search genres..." autocomplete="off" />
             <div id="genreSuggestions" class="autocomplete-suggestions"></div>
             <div id="selectedGenres" class="selected-items"></div>
           </div>
 
           <div class="form-group">
-            <label for="language">Language (Optional)</label>
+            <label for="language">🌐 Language (Optional)</label>
             <select id="language" name="language">
               <option value="">-- Select Language --</option>
               <option value="English">English</option>
@@ -73,12 +90,13 @@
               <option value="German">German</option>
               <option value="Chinese">Chinese</option>
               <option value="Japanese">Japanese</option>
+              <option value="Korean">Korean</option>
               <option value="Other">Other</option>
             </select>
           </div>
 
           <div class="form-group">
-            <label for="published_date">Published Date (Optional)</label>
+            <label for="published_date">📅 Published Date (Optional)</label>
             <input type="text" id="published_date" name="published_date" placeholder="YYYY-MM-DD" />
           </div>
 
@@ -86,7 +104,7 @@
             <div class="progress-fill" id="progressFill"></div>
           </div>
 
-          <button type="submit" class="btn btn-primary">Upload Book</button>
+          <button type="submit" class="btn btn-primary btn-lg">📤 Upload Book</button>
 
           <div id="message" class="message" style="display: none;"></div>
         </form>

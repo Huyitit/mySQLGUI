@@ -8,26 +8,46 @@
   </head>
   <body>
     <nav class="navbar">
-      <div class="nav-brand">📚 Book Library</div>
-      <ul class="nav-menu">
-        <li><a href="/dashboard.html">Dashboard</a></li>
-        <li><a href="/community.html" class="active">Community</a></li>
-        <li><a href="/library.html">My Library</a></li>
-        <li><a href="/upload.html">Upload</a></li>
-        <li><a href="#" id="logout">Logout</a></li>
-      </ul>
+      <div class="nav-container">
+        <a href="/dashboard.html" class="nav-brand">📚 Book Library</a>
+        <ul class="nav-menu">
+          <li><a href="/dashboard.html" class="nav-link">🏠 Dashboard</a></li>
+          <li><a href="/community.html" class="nav-link active">🌍 Community</a></li>
+          <li><a href="/library.html" class="nav-link">📖 My Library</a></li>
+          <li><a href="/upload.html" class="nav-link">📤 Upload</a></li>
+        </ul>
+        <div class="user-menu">
+          <div class="user-info" id="userInfoToggle">
+            <div class="user-avatar"><span id="userInitial">U</span></div>
+            <span class="user-name" id="username"></span>
+          </div>
+          <div class="user-dropdown" id="userDropdown">
+            <div class="user-dropdown-item" id="logout">
+              <span>🚪</span>
+              <span>Logout</span>
+            </div>
+            <div class="user-dropdown-item danger" id="deleteAccount">
+              <span>🗑️</span>
+              <span>Delete Account</span>
+            </div>
+          </div>
+        </div>
+      </div>
     </nav>
 
-    <div class="container">
-      <h1>📖 Community Books</h1>
+    <div class="main-container">
+      <div class="page-header">
+        <h1 class="page-title">Community Library 🌍</h1>
+        <p class="page-subtitle">Discover and explore books shared by our community</p>
+      </div>
 
       <div class="search-bar">
         <input
           type="text"
           id="searchInput"
-          placeholder="Search books by title, author, or genre..."
+          placeholder="🔍 Search books by title, author, or genre..."
         />
-        <button onclick="searchBooks()" class="btn">Search</button>
+        <button onclick="searchBooks()" class="btn btn-primary">Search</button>
       </div>
 
       <div class="filters">
@@ -35,6 +55,9 @@
           <option value="">All Languages</option>
           <option value="English">English</option>
           <option value="Vietnamese">Vietnamese</option>
+          <option value="Spanish">Spanish</option>
+          <option value="French">French</option>
+          <option value="German">German</option>
         </select>
 
         <select id="formatFilter">
@@ -44,7 +67,7 @@
           <option value="MOBI">MOBI</option>
         </select>
 
-        <button onclick="applyFilters()" class="btn">Apply Filters</button>
+        <button onclick="applyFilters()" class="btn btn-secondary">Apply Filters</button>
       </div>
 
       <div id="booksGrid" class="books-grid"></div>

@@ -45,7 +45,7 @@ public class GenreDAO {
      */
     public List<Genre> searchByName(String query) throws SQLException {
         List<Genre> genres = new ArrayList<>();
-        String sql = "SELECT * FROM GENRE WHERE GenreName LIKE ? ORDER BY GenreName LIMIT 10";
+        String sql = "SELECT * FROM GENRE WHERE GenreName LIKE ? ORDER BY GenreName";
         
         try (Connection conn = ConnectionManager.getInstance().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {

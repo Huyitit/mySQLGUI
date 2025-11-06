@@ -122,6 +122,19 @@ public class UserDAO {
             }
         }
     }
+
+    /**
+     * Delete user by ID
+     */
+    public boolean deleteById(int userId) throws SQLException {
+        String sql = "DELETE FROM USER WHERE UserId = ?";
+        try (Connection conn = ConnectionManager.getInstance().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, userId);
+            int affected = stmt.executeUpdate();
+            return affected > 0;
+        }
+    }
     
     /**
      * Map ResultSet to User object
