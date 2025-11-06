@@ -56,6 +56,7 @@ document.addEventListener("DOMContentLoaded", () => {
           method: "DELETE",
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
+            "Content-Type": "application/json",
           },
         });
         
@@ -64,12 +65,12 @@ document.addEventListener("DOMContentLoaded", () => {
           localStorage.clear();
           window.location.href = "/login.html";
         } else {
-          const error = await response.text();
-          alert("Failed to delete account: " + error);
+          const errorData = await response.json().catch(() => ({ error: "Unknown error" }));
+          alert("Failed to delete account: " + (errorData.error || "Unknown error"));
         }
       } catch (error) {
         console.error("Error deleting account:", error);
-        alert("An error occurred while deleting your account.");
+        alert("An error occurred while deleting your account. Please try again.");
       }
     });
   }
@@ -861,27 +862,21 @@ async function viewCollection(collectionId, collectionName) {
       if (books.length === 0) {
         container.innerHTML = '<p style="text-align: center; padding: 2rem; color: #999;">This collection is empty.</p>';
       } else {
-        // Display books in a grid
+        // Display books in a compact list/grid
         container.innerHTML = books.map(book => `
-          <div class="book-card">
-            <div class="book-cover">
-              <span class="book-icon">📖</span>
+          <div class="collection-book-item">
+            <div class="collection-book-icon">📖</div>
+            <div class="collection-book-info">
+              <h4>${book.name || 'Untitled'}</h4>
+              <p class="collection-book-meta">${book.authors || 'Unknown Author'} • ${book.language || 'Unknown'} • ${book.format || 'Unknown'}</p>
             </div>
-            <div class="book-info">
-              <h3>${book.name || 'Untitled'}</h3>
-              <p class="author">${book.authors || 'Unknown Author'}</p>
-              <p class="meta">
-                <span>🌐 ${book.language || 'Unknown'}</span>
-                <span>📄 ${book.format || 'Unknown'}</span>
-              </p>
-              <div class="book-actions" style="margin-top: 0.5rem;">
-                <button onclick="readBook(${book.bookId})" class="btn btn-small">
-                  📖 Read
-                </button>
-                <button onclick="showBookInfo(${book.bookId}, false)" class="btn btn-small" style="background: #17a2b8;">
-                  ℹ️ Info
-                </button>
-              </div>
+            <div class="collection-book-actions">
+              <button onclick="showBookInfo(${book.bookId}, false)" class="btn btn-small" style="background: #17a2b8;" title="Book Information">
+                ℹ️
+              </button>
+              <button onclick="readBook(${book.bookId})" class="btn btn-small btn-primary" title="Read Book">
+                📖
+              </button>
             </div>
           </div>
         `).join('');

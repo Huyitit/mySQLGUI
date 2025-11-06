@@ -395,9 +395,21 @@ body {
     transform: translateY(-2px);
 }
 
-.btn-sm {
-    padding: var(--space-2) var(--space-4);
+.btn-warning {
+    background-color: var(--warning);
+    color: white;
+}
+
+.btn-warning:hover {
+    background-color: #b45309;
+    transform: translateY(-2px);
+}
+
+.btn-sm,
+.btn-small {
+    padding: var(--space-2) var(--space-3);
     font-size: var(--font-size-xs);
+    gap: var(--space-1);
 }
 
 .btn-lg {
@@ -561,6 +573,14 @@ body {
     display: flex;
     gap: var(--space-2);
     padding: 0 var(--space-5) var(--space-5);
+    flex-wrap: wrap;
+}
+
+.book-actions .btn {
+    flex: 1;
+    min-width: 80px;
+    font-size: 0.7rem;
+    padding: var(--space-2) var(--space-3);
 }
 
 /* ===== COLLECTIONS ===== */
@@ -596,6 +616,72 @@ body {
     font-size: var(--font-size-sm);
     color: var(--text-secondary);
     font-weight: 500;
+}
+
+/* Collection book items (for modal view) */
+.collection-book-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    padding: var(--space-3);
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--space-2);
+    transition: var(--transition);
+}
+
+.collection-book-item:hover {
+    background-color: var(--surface-secondary);
+    border-color: var(--primary);
+    box-shadow: var(--shadow-sm);
+}
+
+.collection-book-icon {
+    font-size: var(--font-size-3xl);
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: var(--radius-md);
+    flex-shrink: 0;
+}
+
+.collection-book-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.collection-book-info h4 {
+    font-size: var(--font-size-base);
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0 0 var(--space-1) 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.collection-book-meta {
+    font-size: var(--font-size-xs);
+    color: var(--text-secondary);
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.collection-book-actions {
+    display: flex;
+    gap: var(--space-2);
+    flex-shrink: 0;
+}
+
+.collection-book-actions .btn {
+    min-width: 36px;
+    padding: var(--space-2);
 }
 
 /* ===== FORMS ===== */
@@ -729,6 +815,25 @@ textarea:focus {
 
 .modal-body {
     padding: var(--space-6);
+    max-height: calc(90vh - 160px);
+    overflow-y: auto;
+}
+
+.modal-body::-webkit-scrollbar {
+    width: 8px;
+}
+
+.modal-body::-webkit-scrollbar-track {
+    background: var(--surface-secondary);
+}
+
+.modal-body::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: var(--radius-md);
+}
+
+.modal-body::-webkit-scrollbar-thumb:hover {
+    background: var(--primary);
 }
 
 .modal-footer {
@@ -763,6 +868,40 @@ textarea:focus {
     font-size: var(--font-size-sm);
 }
 
+.book-detail-item {
+    display: grid;
+    grid-template-columns: 140px 1fr;
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-4);
+    border-bottom: 1px solid var(--border);
+    align-items: start;
+}
+
+.book-detail-item:last-child {
+    border-bottom: none;
+}
+
+.book-detail-item label {
+    font-weight: 600;
+    color: var(--text-secondary);
+    font-size: var(--font-size-sm);
+    padding-top: 2px;
+}
+
+.book-detail-item .value {
+    color: var(--text-primary);
+    font-size: var(--font-size-sm);
+    line-height: 1.6;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+.author-list,
+.genre-list {
+    display: block;
+    line-height: 1.8;
+}
+
 .rating-stars {
     display: flex;
     gap: var(--space-1);
@@ -776,6 +915,40 @@ textarea:focus {
 
 .rating-stars span:hover {
     transform: scale(1.2);
+}
+
+.stars-input {
+    display: flex;
+    gap: var(--space-1);
+    font-size: var(--font-size-2xl);
+}
+
+.stars-input .star {
+    cursor: pointer;
+    color: #ddd;
+    transition: var(--transition);
+}
+
+.stars-input .star.active {
+    color: var(--warning);
+}
+
+.stars-input .star:hover {
+    transform: scale(1.2);
+    color: var(--warning);
+}
+
+.edit-section {
+    margin-top: var(--space-6);
+    padding-top: var(--space-6);
+    border-top: 2px solid var(--border);
+}
+
+.edit-section h3 {
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: var(--space-4);
 }
 
 .book-actions-modal {
