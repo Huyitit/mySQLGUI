@@ -39,8 +39,8 @@ CREATE TABLE BOOK (
     Format VARCHAR(20),
     UserId INT,
     PublisherId INT,
-    FOREIGN KEY (UserId) REFERENCES USER(UserId) ON DELETE CASCADE,
-    FOREIGN KEY (PublisherId) REFERENCES PUBLISHER(PublisherId)
+    FOREIGN KEY (UserId) REFERENCES USER(UserId) ON DELETE SET NULL,
+    FOREIGN KEY (PublisherId) REFERENCES PUBLISHER(PublisherId) ON DELETE SET NULL
 );
 
 -- Quan hệ COLLECTION (Bộ sưu tập, phụ thuộc vào USER)
