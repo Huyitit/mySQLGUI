@@ -109,17 +109,17 @@ CREATE TABLE BOOKMARK (
     FOREIGN KEY (UserBookId) REFERENCES USERBOOK(UserBookId) ON DELETE CASCADE
 );
 
-SELECT * FROM user;
-SELECT * FROM publisher;
-SELECT * FROM author;
-SELECT * FROM genre;
-SELECT * FROM book;
-SELECT * FROM collection;
-SELECT * FROM userbook;
-SELECT * FROM collectionbook;
-SELECT * FROM authorbook;
-SELECT * FROM genrebook;
-SELECT * FROM bookmark;
+-- SELECT * FROM user;
+-- SELECT * FROM publisher;
+-- SELECT * FROM author;
+-- SELECT * FROM genre;
+-- SELECT * FROM book;
+-- SELECT * FROM collection;
+-- SELECT * FROM userbook;
+-- SELECT * FROM collectionbook;
+-- SELECT * FROM authorbook;
+-- SELECT * FROM genrebook;
+-- SELECT * FROM bookmark;
 
 INSERT INTO
     GENRE (GenreName)
