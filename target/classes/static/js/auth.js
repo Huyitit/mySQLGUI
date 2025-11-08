@@ -101,3 +101,13 @@ function getAuthHeaders() {
     "Content-Type": "application/json",
   };
 }
+
+function logout() {
+    // Clear all authentication data
+    localStorage.removeItem('token');
+    localStorage.removeItem('userId');
+    localStorage.removeItem('username'); // If stored
+    
+    // Redirect to login page
+    window.location.href = '/login.html';
+}
