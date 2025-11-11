@@ -7,7 +7,8 @@
 
 A modern, full-stack web application for managing and reading digital books. Built with Spring Boot, MySQL, and vanilla JavaScript, featuring JWT authentication, in-browser PDF reading, and a beautiful, responsive UI.
 
-![Book Library Banner](docs/images/banner.png)
+<img width="649" height="84" alt="image" src="https://github.com/user-attachments/assets/aab2bc8b-7ca2-4a25-8c0f-73b63ef12767" />
+
 
 ## ✨ Features
 
@@ -207,25 +208,30 @@ See `src/main/resources/database.sql` for the complete schema.
 All protected endpoints require `Authorization: Bearer {token}` header.
 
 ## 🎨 Screenshots
+### DASHBOARD
 
-### Dashboard
 
-![Dashboard](docs/images/dashboard.png)
+<img width="1417" height="957" alt="image" src="https://github.com/user-attachments/assets/25901779-d4d8-4ffd-9ca2-5340ebff9f25" />
+
 _Personal dashboard with reading statistics and recent activity_
 
 ### Community Library
 
-![Library](docs/images/community.png)
+<img width="1417" height="957" alt="image" src="https://github.com/user-attachments/assets/217cd7f1-ce91-4285-94ff-19155ad12bd8" />
+
 _Browse and discover books from the community_
 
 ### Book Reader
 
-![Reader](docs/images/reader.png)
+<img width="1417" height="957" alt="image" src="https://github.com/user-attachments/assets/65064211-44f4-495e-a048-94420c0e1df1" />
+
 _In-browser PDF reader with bookmarks and progress tracking_
 
 ### Upload Book
 
-![Upload](docs/images/upload.png)
+<img width="1417" height="957" alt="image" src="https://github.com/user-attachments/assets/04b7f93d-9f68-4020-9607-af24f9932f15" />
+
+
 _Upload books with intuitive tag-based genre selection_
 
 ## 🛠️ Technologies Used
