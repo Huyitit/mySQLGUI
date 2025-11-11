@@ -210,26 +210,25 @@ All protected endpoints require `Authorization: Bearer {token}` header.
 ## 🎨 Screenshots
 ### DASHBOARD
 
+<img width="1417" height="957" alt="image" src="https://github.com/user-attachments/assets/e353361f-6963-4511-bbc2-7fe6b8ffc580" />
 
-<img width="1417" height="957" alt="image" src="https://github.com/user-attachments/assets/25901779-d4d8-4ffd-9ca2-5340ebff9f25" />
 
 _Personal dashboard with reading statistics and recent activity_
 
 ### Community Library
+<img width="1417" height="957" alt="image" src="https://github.com/user-attachments/assets/ec45eca2-6cfc-4901-b57e-22a3ec8c7e84" />
 
-<img width="1417" height="957" alt="image" src="https://github.com/user-attachments/assets/217cd7f1-ce91-4285-94ff-19155ad12bd8" />
 
 _Browse and discover books from the community_
 
 ### Book Reader
+<img width="1417" height="957" alt="image" src="https://github.com/user-attachments/assets/db82dcd4-6583-42f0-8bb3-7cebe3d7f3c3" />
 
-<img width="1417" height="957" alt="image" src="https://github.com/user-attachments/assets/65064211-44f4-495e-a048-94420c0e1df1" />
 
 _In-browser PDF reader with bookmarks and progress tracking_
 
 ### Upload Book
-
-<img width="1417" height="957" alt="image" src="https://github.com/user-attachments/assets/04b7f93d-9f68-4020-9607-af24f9932f15" />
+<img width="1417" height="957" alt="image" src="https://github.com/user-attachments/assets/819d42d1-aefd-42ce-a5e3-36685fa7675a" />
 
 
 _Upload books with intuitive tag-based genre selection_
